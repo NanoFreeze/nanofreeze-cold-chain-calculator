@@ -1,0 +1,20 @@
+{
+  "//": "Standalone on purpose — does NOT extend the monorepo tsconfig.base, so this folder can be copied verbatim into its own open-source repo and just work. Native-ESM (nodenext) with .js import specifiers, so the built dist runs in Node AND the browser (see demo/).",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

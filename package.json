@@ -1,0 +1,80 @@
+{
+  "name": "@nanofreeze/coldchain-calc",
+  "version": "0.2.0",
+  "description": "Pure cold-chain logistics savings calculator — reduce transport waste (merma) with NanoFreeze cold layers (capas). Framework-free, tested, MIT.",
+  "license": "MIT",
+  "private": false,
+  "type": "module",
+  "keywords": [
+    "cold-chain",
+    "logistics",
+    "savings",
+    "calculator",
+    "roi",
+    "refrigeration"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./calc": {
+      "types": "./dist/calc.d.ts",
+      "import": "./dist/calc.js",
+      "default": "./dist/calc.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "default": "./dist/types.js"
+    },
+    "./country": {
+      "types": "./dist/country.d.ts",
+      "import": "./dist/country.js",
+      "default": "./dist/country.js"
+    },
+    "./defaults": {
+      "types": "./dist/defaults.d.ts",
+      "import": "./dist/defaults.js",
+      "default": "./dist/defaults.js"
+    },
+    "./input-schema": {
+      "types": "./dist/input-schema.d.ts",
+      "import": "./dist/input-schema.js",
+      "default": "./dist/input-schema.js"
+    },
+    "./capas": {
+      "types": "./dist/capas/index.d.ts",
+      "import": "./dist/capas/index.js",
+      "default": "./dist/capas/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "demo",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "demo": "npm run build && npx --yes serve . -l 4173"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.9"
+  }
+}
