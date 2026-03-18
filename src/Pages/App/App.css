@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@plugin "tailwind-scrollbar" {
+  preferredStrategy: pseudoelements;
+  nocompatible: true;
+}
+
+@theme {
+    /*Grey*/
+    --color-soft-grey: #FAFBFC;
+    --color-light-grey: #F8F9FA;
+    --color-grey: #E9ECEF;
+    --color-grey-chart: #CED4DA;
+
+    /*Primary blue*/
+    --color-primary-blue: #102147;
+    --color-primary-medium-blue: #5D7092;
+    --color-primary-soft-blue: #D6E0F0;
+
+    /*Seconday blue*/
+    --color-secondary-blue: #16A3B6;
+
+    /*Text*/
+    --color-main-title: #1C1C1C;
+    --color-subtitle: #3A3A3A;
+    --color-text: #555555;
+    --color-secondary-text: #777777;
+
+    /*Other*/
+    --color-soft-yellow: #FFF4DB;
+    --color-yellow: #FFBF33;
+    --color-dark-yellow: #8B5C00;
+
+    --color-soft-blue: #EAF4FF;
+    --color-blue: #4C9DFF;
+    --color-dark-blue: #1A4B8C;
+
+    --color-soft-red: #FBEAEA;
+    --color-red: #E14D4D;
+    --color-dark-red: #6A0E0E;
+
+    --color-soft-green: #ECFEF2;
+    --color-green: #4ECB71;
+    --color-dark-green: #1C7430;
+}
