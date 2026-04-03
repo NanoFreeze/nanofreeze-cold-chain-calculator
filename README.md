@@ -128,12 +128,18 @@ against the source workbook is locked in [`src/capas.test.ts`](./src/capas.test.
 
 ## Demo
 
-A self-contained calculator page lives in [`demo/`](./demo). Build the package,
-then serve it:
+Two self-contained calculator pages live in [`demo/`](./demo) — no bundler, no
+framework; they import the built `dist/` directly. Build the package, then serve
+it:
 
 ```bash
 npm install && npm run build && npm run demo
 ```
+
+| Page | Model |
+|---|---|
+| [`demo/index.html`](./demo/index.html) | **Cost & impact (v2, `capas`)** — the four scenarios, guided layer sizing from box length + heat sensitivity, CO₂ and perishables. Seeded with the workbook's worked examples, so a freshly-loaded scenario reproduces the parity fixtures in [`src/capas.test.ts`](./src/capas.test.ts). |
+| [`demo/revenue-uplift.html`](./demo/revenue-uplift.html) | **Revenue uplift (v1)** — per-trip differential, lifetime gain, ROI, payback. |
 
 ## Develop
 
