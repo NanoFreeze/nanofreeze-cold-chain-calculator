@@ -78,9 +78,9 @@
 
   <script type="module">
     // Pure, zod-free subpaths so this page needs no bundler.
-    import { computeColdChain, pickRecommendedScenario, paybackTrips } from "../dist/calc.js";
-    import { COLD_CHAIN_DEFAULTS } from "../dist/defaults.js";
-    import { COLD_CHAIN_COUNTRIES, getColdChainCountry } from "../dist/country.js";
+    import { computeColdChain, pickRecommendedScenario, paybackTrips } from "./dist/calc.js";
+    import { COLD_CHAIN_DEFAULTS } from "./dist/defaults.js";
+    import { COLD_CHAIN_COUNTRIES, getColdChainCountry } from "./dist/country.js";
 
     // Deep clone so edits don't mutate the frozen defaults export.
     const state = structuredClone(COLD_CHAIN_DEFAULTS);

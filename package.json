@@ -68,7 +68,8 @@
     "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "demo": "npm run build && npx --yes serve . -l 4173"
+    "site": "npm run build && node scripts/build-site.mjs",
+    "demo": "npm run site && npx --yes serve site -l 4173"
   },
   "dependencies": {
     "zod": "^4.4.3"

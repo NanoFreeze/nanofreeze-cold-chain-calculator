@@ -94,8 +94,8 @@
   <script type="module">
     // Pure, zod-free subpaths so this page needs no bundler (the `capas` barrel
     // pulls in zod via the schema — these three don't).
-    import { computeCapas, capasScenarioLabel } from "../dist/capas/calc.js";
-    import { stripsPerLayerForBoxLength, layersForSensitivity } from "../dist/capas/sizing.js";
+    import { computeCapas, capasScenarioLabel } from "./dist/capas/calc.js";
+    import { stripsPerLayerForBoxLength, layersForSensitivity } from "./dist/capas/sizing.js";
 
     // The wizard's starting values, from the Capas Frías workbook. Same numbers
     // the model's parity fixtures are pinned to, so a freshly-loaded scenario

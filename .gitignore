@@ -9,3 +9,4 @@ _env
 # editor / os
 .DS_Store
 .claude/
+site/
