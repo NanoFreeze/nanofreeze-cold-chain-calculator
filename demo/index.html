@@ -3,121 +3,253 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NanoFreeze · Calculadora Capas Frías</title>
+  <title>Calculadora de Cadena de Frío · Powered by NanoFreeze</title>
+  <meta name="description" content="Calcula cuánto recupera tu ruta cuando las capas frías de NanoFreeze reducen la merma en transporte. Open source, MIT." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
+    /* Design tokens mirrored from @nanofreeze/theme (theme.css). Copied, not
+       imported: this page ships as a standalone artifact with no build step.
+       If the brand palette changes, it changes there first — then here. */
     :root {
-      --navy: #1a2a47; --teal: #2cbcb6; --surface: #f5f6f8; --card: #fff;
-      --text: #26303f; --muted: #6b7684; --line: #e6e9ee; --good: #1c7a4f; --bad: #b3261e;
+      --canvas: #eef0f3;
+      --surface: #ffffff;
+      --surface-hover: #f6f7f9;
+      --fg: #0a0c0f;
+      --fg-muted: #6b7178;
+      --fg-subtle: #9aa1a9;
+      --fg-label: #3a4048;
+      --border: #e2e5ea;
+      --border-strong: #d1d6dd;
+      --primary: #2b6e89;
+      --primary-hover: #225b73;
+      --primary-fg: #ffffff;
+      --success: #0f9d63;
+      --danger: #b3261e;
+      /* Radii are 0 in the v2 design system — squared, not rounded. */
+      --radius: 0;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; font: 15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      color: var(--text); background: var(--surface); }
-    header { background: var(--navy); color: #fff; padding: 20px 24px; }
-    header h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: .2px; }
-    header p { margin: 4px 0 0; color: #b9c3d6; font-size: 13px; }
-    header a { color: #8fe3df; }
-    main { max-width: 1000px; margin: 0 auto; padding: 24px; display: grid; gap: 20px; }
-    .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
-    .card h2 { margin: 0 0 14px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
-    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-    input, select { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; }
-    input:focus, select:focus { outline: 2px solid var(--teal); outline-offset: -1px; }
-    input[type=checkbox] { width: auto; }
-    .derived { background: #f0fbfa; border: 1px dashed var(--teal); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
-    .derived b { font-variant-numeric: tabular-nums; }
-    .hint { font-size: 12px; color: var(--muted); margin: 10px 0 0; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
-    th:first-child, td:first-child { text-align: left; }
-    thead th { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
-    tr.total td { background: #edfaf6; font-weight: 700; }
-    td.neg { color: var(--bad); }
-    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
-    .kpi { border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
-    .kpi .lab { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
-    .kpi .val { font-size: 22px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
-    .kpi .val.good { color: var(--good); }
-    .kpi .val.bad { color: var(--bad); }
-    .kpi .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    body {
+      margin: 0;
+      font-family: Geist, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-size: 15px; line-height: 1.55;
+      color: var(--fg); background: var(--canvas);
+    }
+
+    /* ── Top bar ─────────────────────────────────────────────────── */
+    .topbar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .topbar svg { display: block; }
+    .ghlink {
+      display: inline-flex; align-items: center; gap: 8px;
+      min-height: 44px; padding: 0 14px;
+      border: 1px solid var(--border-strong); background: var(--surface);
+      color: var(--fg); text-decoration: none; font-size: 13px; font-weight: 500;
+    }
+    .ghlink:hover { background: var(--surface-hover); }
+    .ghlink .mit { color: var(--fg-subtle); border-left: 1px solid var(--border); padding-left: 8px; }
+
+    /* ── Hero ────────────────────────────────────────────────────── */
+    .hero { background: var(--surface); border-bottom: 1px solid var(--border); padding: 28px 24px 24px; }
+    .hero-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+    .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--primary); margin: 0 0 6px; }
+    h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 700; letter-spacing: -.02em; }
+    .hero p { margin: 6px 0 0; color: var(--fg-muted); max-width: 46rem; }
+    .stepcount { color: var(--fg-muted); font-size: 14px; white-space: nowrap; }
+
+    /* ── Sticky KPI rail ─────────────────────────────────────────── */
+    .metrics { position: sticky; top: 0; z-index: 10; background: var(--canvas); border-bottom: 1px solid var(--border); padding: 14px 24px; }
+    .metrics-inner { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    @media (min-width: 768px) { .metrics-inner { grid-template-columns: repeat(4, 1fr); } }
+    .metric { background: var(--surface); border: 1px solid var(--border); padding: 10px 14px; }
+    .metric.accent { background: rgba(43, 110, 137, .08); border-color: rgba(43, 110, 137, .3); }
+    .metric .lab { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-muted); }
+    .metric .val { margin-top: 2px; font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .metric.accent .val { color: var(--primary); }
+
+    /* ── Layout ──────────────────────────────────────────────────── */
+    main { max-width: 1180px; margin: 0 auto; padding: 24px; display: grid; gap: 24px; align-items: start; }
+    @media (min-width: 900px) { main { grid-template-columns: 260px 1fr; } }
+    /* Grid/flex children default to min-width:auto, so the wide results table
+       would push the page sideways instead of scrolling inside .scroll. */
+    main > *, .card { min-width: 0; }
+
+    /* ── Step rail ───────────────────────────────────────────────── */
+    .rail { display: grid; gap: 8px; }
+    .rail button {
+      display: flex; align-items: center; gap: 12px; width: 100%;
+      min-height: 56px; padding: 0 14px; text-align: left; font: inherit;
+      background: var(--surface); border: 1px solid var(--border); color: var(--fg-subtle);
+      cursor: pointer;
+    }
+    .rail button:hover:not(:disabled) { background: var(--surface-hover); }
+    .rail button:disabled { cursor: not-allowed; opacity: .75; }
+    .rail button .n {
+      display: grid; place-items: center; width: 26px; height: 26px; flex: none;
+      border-radius: 999px; background: var(--canvas); color: var(--fg-muted);
+      font-size: 12px; font-weight: 600;
+    }
+    .rail button[aria-current="step"] { border-color: var(--primary); background: rgba(43,110,137,.06); color: var(--fg); font-weight: 600; }
+    .rail button[aria-current="step"] .n { background: var(--primary); color: var(--primary-fg); }
+    .rail button.done { color: var(--fg); }
+    .rail button.done .n { background: var(--primary); color: var(--primary-fg); }
+
+    /* ── Cards + fields ──────────────────────────────────────────── */
+    .steplead { color: var(--fg-muted); margin: 0 0 16px; }
+    .card { background: var(--surface); border: 1px solid var(--border); padding: 20px; margin-bottom: 16px; }
+    .card h2 { margin: 0 0 14px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 640px) { .grid { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); } }
+    label { display: block; font-size: 13px; color: var(--fg-label); margin-bottom: 5px; font-weight: 500; }
+    .control { position: relative; display: flex; align-items: center; }
+    input[type=number], input[type=text], select {
+      width: 100%; min-height: 44px; padding: 8px 12px; font: inherit;
+      color: var(--fg); background: var(--surface);
+      border: 1px solid var(--border-strong); border-radius: var(--radius);
+    }
+    input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: -1px; }
+    .control .unit { position: absolute; right: 12px; font-size: 12px; color: var(--fg-subtle); pointer-events: none; }
+    .control:has(.unit) input { padding-right: 46px; }
+    .note { margin: 6px 0 0; font-size: 12px; color: var(--fg-subtle); }
+    .switch { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+    .switch input { width: 18px; height: 18px; accent-color: var(--primary); }
+    .switch label { margin: 0; }
+
+    /* Choice tiles (scenario step) */
+    .choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+    .choice {
+      min-height: 44px; padding: 14px; text-align: left; font: inherit; cursor: pointer;
+      background: var(--surface); border: 1px solid var(--border-strong); color: var(--fg);
+    }
+    .choice:hover { background: var(--surface-hover); }
+    .choice[aria-pressed="true"] { border-color: var(--primary); background: rgba(43,110,137,.06); }
+    .choice b { display: block; font-weight: 600; }
+    .choice span { font-size: 12px; color: var(--fg-muted); }
+
+    /* Derived read-outs (mirrors the builder's product step) */
+    .derived { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; border-top: 1px solid var(--border); padding-top: 16px; margin-top: 4px; }
+    .derived .lab { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-muted); }
+    .derived .val { margin-top: 2px; font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    /* Tables */
     .scroll { overflow-x: auto; }
-    footer { text-align: center; color: var(--muted); font-size: 12px; padding: 8px 0 32px; }
-    a { color: #17827e; }
+    table { width: 100%; min-width: 520px; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    th:first-child, td:first-child { text-align: left; }
+    thead th { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); }
+    tr.total td { background: rgba(43,110,137,.06); font-weight: 700; }
+    td.neg { color: var(--danger); }
+
+    /* ── Buttons / nav ───────────────────────────────────────────── */
+    .nav { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 44px; padding: 0 18px; font: inherit; font-weight: 500;
+      border: 1px solid var(--border-strong); background: var(--surface); color: var(--fg);
+      border-radius: var(--radius); cursor: pointer; text-decoration: none;
+    }
+    .btn:hover { background: var(--surface-hover); }
+    .btn-primary { background: var(--primary); border-color: var(--primary); color: var(--primary-fg); }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .ctas { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 640px) { .ctas { grid-template-columns: 1fr 1fr; } }
+
+    footer { max-width: 1180px; margin: 0 auto; padding: 8px 24px 40px; color: var(--fg-muted); font-size: 13px; }
+    /* inline-block + padding so the links clear the 44px tap target on touch. */
+    footer a { color: var(--primary); display: inline-block; padding: 13px 2px; }
+
+    /* ── Print: "Descargar el caso" is print-to-PDF, so no library ── */
+    @media print {
+      .topbar, .rail, .nav, .ctas, .metrics { position: static; }
+      .no-print, .rail, .nav, .ctas, .topbar .ghlink { display: none !important; }
+      body { background: #fff; font-size: 12px; }
+      main { display: block; padding: 0; }
+      .card { break-inside: avoid; border-color: #ccc; }
+      .metrics { border: 0; padding: 0 0 12px; }
+      table { min-width: 0; }
+      a[href]::after { content: ""; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Calculadora Capas Frías</h1>
-    <p>
-      Las capas frías de NanoFreeze reemplazan la refrigeración: recuperan merma, evitan CO₂ y
-      abaratan el transporte — con <code>@nanofreeze/coldchain-calc/capas</code> (modelo v2).
-      <a href="./revenue-uplift.html">¿Buscas el modelo de mayor ingreso (v1)?</a>
-    </p>
+  <header class="topbar">
+    <!-- Rendered from the real <NanoFreezeLogo/> in @nanofreeze/brand, so the
+         mark can't drift from the one the apps ship. -->
+    <a href="https://nanofreeze.tech" aria-label="NanoFreeze">
+      <img src="./nanofreeze-logo.svg" width="148" height="65" alt="NanoFreeze" />
+    </a>
+    <a class="ghlink" href="https://github.com/NanoFreeze/nanofreeze-cold-chain-calculator" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+      </svg>
+      GitHub <span class="mit">MIT</span>
+    </a>
   </header>
-  <main>
-    <section class="card">
-      <h2>Escenario</h2>
-      <div class="grid" id="scenario"></div>
-      <p class="hint">Cambiar de escenario reinicia los valores al ejemplo de ese caso.</p>
-    </section>
 
-    <section class="card">
-      <h2>Capas</h2>
-      <div class="grid" id="layers"></div>
-      <div id="sizing"></div>
-    </section>
-
-    <section class="card">
-      <h2>Producto y merma</h2>
-      <div class="grid" id="product"></div>
-    </section>
-
-    <section class="card">
-      <h2>Logística</h2>
-      <div class="grid" id="logistics"></div>
-    </section>
-
-    <section class="card">
-      <h2>Resultado</h2>
-      <div class="kpis" id="kpis"></div>
-      <div class="scroll" style="margin-top:16px">
-        <table>
-          <thead><tr id="flow-head"></tr></thead>
-          <tbody id="flows"></tbody>
-        </table>
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <p class="eyebrow">Calculadora de Cadena de Frío · Powered by NanoFreeze</p>
+        <h1 id="step-title">Escenario</h1>
+        <p id="step-desc"></p>
       </div>
-      <p class="hint" id="assumptions-note"></p>
-    </section>
-    <footer>MIT © NanoFreeze · <a href="https://nanofreeze.tech">nanofreeze.tech</a></footer>
+      <div class="stepcount" id="step-count"></div>
+    </div>
+  </section>
+
+  <section class="metrics">
+    <div class="metrics-inner" id="metrics"></div>
+  </section>
+
+  <main>
+    <nav class="rail no-print" id="rail" aria-label="Pasos"></nav>
+    <div>
+      <div id="step-body"></div>
+      <div class="nav no-print">
+        <button class="btn" id="back">Atrás</button>
+        <button class="btn btn-primary" id="next"></button>
+      </div>
+    </div>
   </main>
 
+  <footer>
+    MIT © NanoFreeze ·
+    <a href="https://github.com/NanoFreeze/nanofreeze-cold-chain-calculator" target="_blank" rel="noopener">código fuente</a> ·
+    <a href="./revenue-uplift.html">modelo de mayor ingreso (v1)</a>
+  </footer>
+
   <script type="module">
-    // Pure, zod-free subpaths so this page needs no bundler (the `capas` barrel
-    // pulls in zod via the schema — these three don't).
-    import { computeCapas, capasScenarioLabel } from "./dist/capas/calc.js";
+    // Pure, zod-free subpaths — this page has no bundler and no dependencies.
+    import { computeCapas } from "./dist/capas/calc.js";
     import { stripsPerLayerForBoxLength, layersForSensitivity } from "./dist/capas/sizing.js";
 
-    // The wizard's starting values, from the Capas Frías workbook. Same numbers
-    // the model's parity fixtures are pinned to, so a freshly-loaded scenario
-    // shows the figures the engine was validated against.
+    // ── Presets ───────────────────────────────────────────────────
+    // The wizard's starting values, from the Capas Frías workbook — the same
+    // numbers @nanofreeze/coldchain-calc pins its parity fixtures to, so a
+    // freshly-loaded scenario shows the figures the engine was validated on.
     const PRESETS = {
       "nacional-cajas": {
         layers: { packaging: "cajas", stripsPerLayer: 7, layersPerBox: 1, boxLengthCm: 105, heatSensitivity: "sensible" },
-        product: { unitsPerCarrier: 150, productKgPerCarrier: 16, valuePerCarrierCop: 360_000 },
+        product: { name: "", unitsPerCarrier: 150, productKgPerCarrier: 16, valuePerCarrierCop: 360_000 },
         spoilage: { spoilagePct: 0.15, coldChainSharePct: 0.5, residualSharePct: 0 },
         logistics: { market: "nacional", reeferTruckCostCop: 3_500_000, reeferPremiumPct: 0.4, carriersPerTruck: 120,
           tripsPerMonth: 8, distanceKm: 500, reeferHoursPerTrip: 10, reuse: { hasReturnLogistics: true, outboundDays: 1 } },
       },
       "nacional-pallets": {
         layers: { packaging: "pallets", layersPerPallet: 8, costPerPalletLayerCop: 2_900, weightPerPalletLayerKg: 1.5 },
-        product: { unitsPerCarrier: 3_000, productKgPerCarrier: 320, valuePerCarrierCop: 7_200_000 },
+        product: { name: "", unitsPerCarrier: 3_000, productKgPerCarrier: 320, valuePerCarrierCop: 7_200_000 },
         spoilage: { spoilagePct: 0.15, coldChainSharePct: 0.5, residualSharePct: 0 },
         logistics: { market: "nacional", reeferTruckCostCop: 3_500_000, reeferPremiumPct: 0.4, carriersPerTruck: 10,
           tripsPerMonth: 8, distanceKm: 500, reeferHoursPerTrip: 10, reuse: { hasReturnLogistics: true, outboundDays: 1 } },
       },
       "exportacion-cajas": {
         layers: { packaging: "cajas", stripsPerLayer: 7, layersPerBox: 1, boxLengthCm: 105, heatSensitivity: "sensible" },
-        product: { unitsPerCarrier: 150, productKgPerCarrier: 16, valuePerCarrierCop: 360_000 },
+        product: { name: "", unitsPerCarrier: 150, productKgPerCarrier: 16, valuePerCarrierCop: 360_000 },
         spoilage: { spoilagePct: 0.3, coldChainSharePct: 0.5, residualSharePct: 0 },
         logistics: { market: "exportacion", airRatePerKgCop: 8_000, carriersPerShipment: 400, shipmentsPerMonth: 4,
           airDistanceKm: 5_000, landLeg: { replaceReeferTruck: true, carriersPerTruck: 200, reeferTruckCostCop: 3_500_000,
@@ -125,7 +257,7 @@
       },
       "exportacion-pallets": {
         layers: { packaging: "pallets", layersPerPallet: 8, costPerPalletLayerCop: 2_900, weightPerPalletLayerKg: 1.5 },
-        product: { unitsPerCarrier: 3_000, productKgPerCarrier: 320, valuePerCarrierCop: 7_200_000 },
+        product: { name: "", unitsPerCarrier: 3_000, productKgPerCarrier: 320, valuePerCarrierCop: 7_200_000 },
         spoilage: { spoilagePct: 0.3, coldChainSharePct: 0.5, residualSharePct: 0 },
         logistics: { market: "exportacion", airRatePerKgCop: 8_000, carriersPerShipment: 20, shipmentsPerMonth: 4,
           airDistanceKm: 5_000, landLeg: { replaceReeferTruck: true, carriersPerTruck: 10, reeferTruckCostCop: 3_500_000,
@@ -133,185 +265,279 @@
       },
     };
 
+    // Step labels + copy are the builder's, verbatim (packages/cold-chain-ui
+    // strings.ts, `es`) — this page is the same wizard, minus the proprietary
+    // save/checkout step.
+    const STEPS = [
+      { id: "scenario", label: "Escenario", desc: "Elige cómo mueves tu producto — nacional o exportación, en cajas o pallets.", cta: "Siguiente: producto" },
+      { id: "product", label: "Producto y empaque", desc: "Producto transportado, unidades/valor/peso por caja o pallet, y las capas frías.", cta: "Siguiente: logística" },
+      { id: "logistics", label: "Logística", desc: "Transporte, frecuencia, distancia y — en nacional — el ciclo de reúso de las capas.", cta: "Siguiente: merma" },
+      { id: "spoilage", label: "Merma", desc: "Cuánta merma recuperan las capas frías en la cadena de frío.", cta: "Ver mis resultados" },
+      { id: "results", label: "Resultados", desc: "Ahorro, impacto ambiental y perecederos salvados.", cta: null },
+    ];
+
+    let stepIndex = 0;
+    let maxReached = 0;
     let scenario = { market: "nacional", packaging: "cajas" };
     let state = structuredClone(PRESETS["nacional-cajas"]);
 
-    const cop = (n) => new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(n || 0);
+    // ── Formatters (mirror @nanofreeze/cold-chain-ui/format) ──────
+    const money = (n) => new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(n || 0);
     const usd = (n) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n || 0);
+    const num = (n, d = 0) => (n || 0).toLocaleString("es-CO", { maximumFractionDigits: d, minimumFractionDigits: d });
     const pct = (n) => `${((n || 0) * 100).toFixed(1)}%`;
-    const num = (n, d = 0) => (n || 0).toLocaleString("es-CO", { maximumFractionDigits: d });
+    // formatRoi: a multiplier, not a percentage — 1 318× not 131 850 %.
+    const roiFmt = (r) => (!Number.isFinite(r) ? "∞" : `${num(r, r >= 10 ? 0 : 1)}×`);
 
-    /** A number field bound to a path in `state`, e.g. "product.unitsPerCarrier". */
-    function field(parent, path, label, { step = "any", scale = 1 } = {}) {
-      const wrap = document.createElement("div");
-      wrap.innerHTML = `<label>${label}</label>`;
-      const inp = document.createElement("input");
-      inp.type = "number"; inp.step = step;
-      inp.value = read(path) * scale;
-      inp.oninput = () => { write(path, Number(inp.value) / scale); render(); };
-      wrap.appendChild(inp);
-      parent.appendChild(wrap);
-    }
-
-    function select(parent, label, options, value, onChange) {
-      const wrap = document.createElement("div");
-      wrap.innerHTML = `<label>${label}</label>`;
-      const sel = document.createElement("select");
-      for (const [v, text] of options) {
-        const o = document.createElement("option");
-        o.value = v; o.textContent = text; o.selected = v === value;
-        sel.appendChild(o);
-      }
-      sel.onchange = () => onChange(sel.value);
-      wrap.appendChild(sel);
-      parent.appendChild(wrap);
-    }
-
-    function checkbox(parent, path, label) {
-      const wrap = document.createElement("div");
-      wrap.innerHTML = `<label>${label}</label>`;
-      const inp = document.createElement("input");
-      inp.type = "checkbox"; inp.checked = !!read(path);
-      inp.onchange = () => { write(path, inp.checked); render(); };
-      wrap.appendChild(inp);
-      parent.appendChild(wrap);
-    }
-
+    // ── State access ──────────────────────────────────────────────
     const read = (path) => path.split(".").reduce((o, k) => o?.[k], state);
     function write(path, value) {
       const keys = path.split(".");
       const last = keys.pop();
       keys.reduce((o, k) => o[k], state)[last] = value;
     }
+    const carrierWord = () => (state.layers.packaging === "cajas" ? "caja" : "pallet");
+    // "una caja" vs "un pallet" — the carrier noun changes gender with packaging.
+    const carrierArticle = () => (state.layers.packaging === "cajas" ? "una" : "un");
 
-    function renderScenario() {
-      const el = document.getElementById("scenario");
-      el.innerHTML = "";
-      select(el, "Mercado", [["nacional", "Nacional"], ["exportacion", "Exportación"]], scenario.market, (v) => {
-        scenario = { ...scenario, market: v };
-        state = structuredClone(PRESETS[`${scenario.market}-${scenario.packaging}`]);
-        render();
-      });
-      select(el, "Empaque", [["cajas", "Cajas"], ["pallets", "Pallets"]], scenario.packaging, (v) => {
-        scenario = { ...scenario, packaging: v };
-        state = structuredClone(PRESETS[`${scenario.market}-${scenario.packaging}`]);
-        render();
-      });
+    // ── Field builders ────────────────────────────────────────────
+    const el = (tag, attrs = {}, ...kids) => {
+      const n = document.createElement(tag);
+      for (const [k, v] of Object.entries(attrs)) {
+        if (k === "class") n.className = v;
+        else if (k.startsWith("on")) n[k] = v;
+        else if (v !== undefined && v !== null) n.setAttribute(k, v);
+      }
+      for (const kid of kids) n.append(kid);
+      return n;
+    };
+
+    function numberField(path, label, { step = "any", scale = 1, unit, note, id } = {}) {
+      const input = el("input", { type: "number", step, id, inputmode: "decimal" });
+      input.value = String(read(path) * scale);
+      input.oninput = () => { write(path, Number(input.value) / scale); render({ keepFocus: id }); };
+      const control = el("div", { class: "control" }, input);
+      if (unit) control.append(el("span", { class: "unit" }, unit));
+      const wrap = el("div", {}, el("label", { for: id }, label), control);
+      if (note) wrap.append(el("p", { class: "note" }, note));
+      return wrap;
     }
 
-    function renderLayers() {
-      const el = document.getElementById("layers");
-      const sizing = document.getElementById("sizing");
-      el.innerHTML = ""; sizing.innerHTML = "";
+    function textField(path, label, { placeholder, id } = {}) {
+      const input = el("input", { type: "text", placeholder, id });
+      input.value = read(path) ?? "";
+      input.oninput = () => { write(path, input.value); };
+      return el("div", {}, el("label", { for: id }, label), el("div", { class: "control" }, input));
+    }
+
+    function selectField(label, options, value, onChange, id) {
+      const sel = el("select", { id });
+      for (const [v, text] of options) {
+        const o = el("option", { value: v }, text);
+        if (v === value) o.selected = true;
+        sel.append(o);
+      }
+      sel.onchange = () => onChange(sel.value);
+      return el("div", {}, el("label", { for: id }, label), el("div", { class: "control" }, sel));
+    }
+
+    function switchField(path, label, id) {
+      const input = el("input", { type: "checkbox", id });
+      input.checked = !!read(path);
+      input.onchange = () => { write(path, input.checked); render(); };
+      return el("div", { class: "switch" }, input, el("label", { for: id }, label));
+    }
+
+    function card(title, ...children) {
+      const c = el("div", { class: "card" });
+      if (title) c.append(el("h2", {}, title));
+      for (const child of children) c.append(child);
+      return c;
+    }
+
+    const grid = (...fields) => el("div", { class: "grid" }, ...fields);
+
+    // ── Steps ─────────────────────────────────────────────────────
+    function selectScenario(next) {
+      scenario = { ...scenario, ...next };
+      // Switching scenario is "start this example" — a hard reset, same as the
+      // builder (see CAPAS_SCENARIO_PRESETS).
+      state = structuredClone(PRESETS[`${scenario.market}-${scenario.packaging}`]);
+      render();
+    }
+
+    function tile(label, hint, active, onClick) {
+      return el("button", {
+        class: "choice", type: "button", "aria-pressed": String(active),
+        "aria-label": `${label} — ${hint}`,
+        onclick: onClick,
+      }, el("b", {}, label), el("span", {}, hint));
+    }
+
+    function stepScenario() {
+      return el("div", {},
+        el("p", { class: "steplead" },
+          "Cada escenario carga un ejemplo real con valores que puedes ajustar. Cambiar de escenario reemplaza los valores por los de ese ejemplo."),
+        card("Mercado", el("div", { class: "choices" },
+          tile("Nacional", "Camión refrigerado que las capas reemplazan.", scenario.market === "nacional", () => selectScenario({ market: "nacional" })),
+          tile("Exportación", "Carga aérea, con tramo terrestre opcional.", scenario.market === "exportacion", () => selectScenario({ market: "exportacion" })),
+        )),
+        card("Empaque", el("div", { class: "choices" },
+          tile("Cajas", "Las capas se cortan en franjas por caja.", scenario.packaging === "cajas", () => selectScenario({ packaging: "cajas" })),
+          tile("Pallets", "Capas por pallet, con costo y peso propios.", scenario.packaging === "pallets", () => selectScenario({ packaging: "pallets" })),
+        )),
+      );
+    }
+
+    function stepProduct(out) {
+      const c = carrierWord();
+      const cards = [
+        card(null,
+          textField("product.name", "Producto", { placeholder: "p. ej. mango, aguacate…", id: "f-name" }),
+          el("div", { style: "height:14px" }),
+          grid(
+            numberField("product.unitsPerCarrier", `Unidades por ${c}`, { step: "1", id: "f-units" }),
+            numberField("product.productKgPerCarrier", `Kg por ${c}`, { step: "0.1", unit: "kg", id: "f-kg" }),
+            numberField("product.valuePerCarrierCop", `Valor comercial por ${c}`, { step: "1000", unit: "COP", id: "f-value" }),
+          ),
+        ),
+      ];
 
       if (state.layers.packaging === "cajas") {
-        // Guided sizing: a prospect knows their box length and how heat-sensitive
-        // the product is — not how many franjas/capas that implies. The engine's
-        // sizing helpers derive the technical numbers.
-        field(el, "layers.boxLengthCm", "Largo de la caja (cm)", { step: "1" });
-        select(el, "Sensibilidad al calor",
-          [["sensible", "Sensible"], ["altamente-sensible", "Altamente sensible"]],
-          state.layers.heatSensitivity ?? "sensible",
-          (v) => { state.layers.heatSensitivity = v; render(); });
-
+        // Guided sizing — a prospect knows their box length and how heat-sensitive
+        // the product is, not how many franjas/capas that implies. The engine's
+        // own helpers derive the technical numbers (sizing.ts).
         const strips = stripsPerLayerForBoxLength(state.layers.boxLengthCm ?? 0);
         const layers = layersForSensitivity(state.layers.heatSensitivity ?? "sensible");
-        // The engine reads stripsPerLayer/layersPerBox — keep them in sync.
         state.layers.stripsPerLayer = strips;
         state.layers.layersPerBox = layers;
-        sizing.innerHTML = `<div class="derived">Derivado: <b>${strips}</b> franjas de 15 cm por capa ·
-          <b>${layers}</b> capa${layers === 1 ? "" : "s"} por caja ⇒ <b>${strips * layers}</b> franjas por caja.</div>`;
+
+        cards.push(card(null,
+          grid(
+            numberField("layers.boxLengthCm", "Largo de la caja", { step: "1", unit: "cm", id: "f-box",
+              note: "Una franja mide 15 cm — se redondea hacia arriba." }),
+            selectField("Sensibilidad al calor",
+              [["sensible", "Sensible"], ["altamente-sensible", "Altamente sensible"]],
+              state.layers.heatSensitivity ?? "sensible",
+              (v) => { state.layers.heatSensitivity = v; render(); }, "f-heat"),
+          ),
+          derivedRow(out, [["Franjas por capa", num(strips)], ["Capas por caja", num(layers)]]),
+        ));
       } else {
-        field(el, "layers.layersPerPallet", "Capas por pallet", { step: "1" });
-        field(el, "layers.costPerPalletLayerCop", "Costo por capa (COP)", { step: "100" });
-        field(el, "layers.weightPerPalletLayerKg", "Peso por capa (kg)", { step: "0.1" });
+        cards.push(card(null,
+          grid(
+            numberField("layers.layersPerPallet", "Capas por pallet", { step: "1", id: "f-lpp" }),
+            numberField("layers.costPerPalletLayerCop", "Costo por capa de pallet", { step: "1", unit: "COP", id: "f-cpl",
+              note: "Placeholder del Excel — confirmar con el proveedor." }),
+            numberField("layers.weightPerPalletLayerKg", "Peso por capa de pallet", { step: "0.1", unit: "kg", id: "f-wpl" }),
+          ),
+          derivedRow(out, []),
+        ));
       }
+
+      return el("div", {},
+        el("p", { class: "steplead" }, `Describe la carga de ${carrierArticle()} ${c} y las capas frías que viajan con ${state.layers.packaging === "cajas" ? "ella" : "él"}.`),
+        ...cards,
+      );
     }
 
-    function renderProduct() {
-      const el = document.getElementById("product");
-      el.innerHTML = "";
-      const carrier = state.layers.packaging === "cajas" ? "caja" : "pallet";
-      field(el, "product.unitsPerCarrier", `Unidades por ${carrier}`, { step: "1" });
-      field(el, "product.productKgPerCarrier", `Kg de producto por ${carrier}`, { step: "0.1" });
-      field(el, "product.valuePerCarrierCop", `Valor por ${carrier} (COP)`, { step: "1000" });
-      field(el, "spoilage.spoilagePct", "Merma total (%)", { step: "0.1", scale: 100 });
-      field(el, "spoilage.coldChainSharePct", "Parte por cadena de frío (%)", { step: "0.1", scale: 100 });
-      field(el, "spoilage.residualSharePct", "Merma residual con capas (%)", { step: "0.1", scale: 100 });
+    /** The builder's read-out strip under the layers card. */
+    function derivedRow(out, extra) {
+      const items = [
+        ...extra,
+        [`Costo de capas por ${carrierWord()}`, money(out.layers.costPerCarrier.cop)],
+        ["Costo de capas por unidad", money(out.layers.costPerProductUnit.cop)],
+        [`Peso extra por ${carrierWord()}`, `${num(out.layers.weightPerCarrierKg, 2)} kg`],
+      ];
+      const row = el("div", { class: "derived" });
+      for (const [lab, val] of items) {
+        row.append(el("div", {}, el("div", { class: "lab" }, lab), el("div", { class: "val" }, val)));
+      }
+      return row;
     }
 
-    function renderLogistics() {
-      const el = document.getElementById("logistics");
-      el.innerHTML = "";
-      const carrier = state.layers.packaging === "cajas" ? "cajas" : "pallets";
-
+    function stepLogistics(out) {
+      const cs = state.layers.packaging === "cajas" ? "Cajas" : "Pallets";
       if (state.logistics.market === "nacional") {
-        field(el, "logistics.reeferTruckCostCop", "Costo del camión refrigerado (COP)", { step: "10000" });
-        field(el, "logistics.reeferPremiumPct", "Sobrecosto del refrigerado (%)", { step: "1", scale: 100 });
-        field(el, "logistics.carriersPerTruck", `${carrier[0].toUpperCase() + carrier.slice(1)} por camión`, { step: "1" });
-        field(el, "logistics.tripsPerMonth", "Viajes por mes", { step: "1" });
-        field(el, "logistics.distanceKm", "Distancia (km)", { step: "10" });
-        field(el, "logistics.reeferHoursPerTrip", "Horas de refrigeración por viaje", { step: "0.5" });
-        checkbox(el, "logistics.reuse.hasReturnLogistics", "¿Logística de retorno? (reutiliza capas)");
-        field(el, "logistics.reuse.outboundDays", "Días de ida", { step: "1" });
-      } else {
-        field(el, "logistics.airRatePerKgCop", "Tarifa aérea (COP/kg)", { step: "100" });
-        field(el, "logistics.carriersPerShipment", `${carrier[0].toUpperCase() + carrier.slice(1)} por embarque`, { step: "1" });
-        field(el, "logistics.shipmentsPerMonth", "Embarques por mes", { step: "1" });
-        field(el, "logistics.airDistanceKm", "Distancia aérea (km)", { step: "100" });
-        checkbox(el, "logistics.landLeg.replaceReeferTruck", "¿Reemplazar el tramo terrestre refrigerado?");
-        if (state.logistics.landLeg?.replaceReeferTruck) {
-          field(el, "logistics.landLeg.carriersPerTruck", `${carrier[0].toUpperCase() + carrier.slice(1)} por camión`, { step: "1" });
-          field(el, "logistics.landLeg.reeferTruckCostCop", "Costo del camión refrigerado (COP)", { step: "10000" });
-          field(el, "logistics.landLeg.reeferPremiumPct", "Sobrecosto del refrigerado (%)", { step: "1", scale: 100 });
-          field(el, "logistics.landLeg.reeferHoursPerTruck", "Horas de refrigeración por camión", { step: "0.5" });
-        }
+        const reuse = out.reuse;
+        return el("div", {},
+          el("p", { class: "steplead" }, "El camión refrigerado que las capas reemplazan, y cada cuánto sale."),
+          card("Transporte", grid(
+            numberField("logistics.reeferTruckCostCop", "Costo del camión refrigerado", { step: "10000", unit: "COP", id: "f-truck" }),
+            numberField("logistics.reeferPremiumPct", "Sobrecosto del refrigerado", { step: "1", scale: 100, unit: "%", id: "f-prem" }),
+            numberField("logistics.carriersPerTruck", `${cs} por camión`, { step: "1", id: "f-cpt" }),
+            numberField("logistics.tripsPerMonth", "Viajes por mes", { step: "1", id: "f-trips" }),
+            numberField("logistics.distanceKm", "Distancia", { step: "10", unit: "km", id: "f-dist" }),
+            numberField("logistics.reeferHoursPerTrip", "Horas de refrigeración por viaje", { step: "0.5", unit: "h", id: "f-hrs" }),
+          )),
+          card("Reúso de las capas",
+            switchField("logistics.reuse.hasReturnLogistics", "Tengo logística de retorno (las capas vuelven y se reutilizan)", "f-ret"),
+            el("div", { style: "height:8px" }),
+            grid(numberField("logistics.reuse.outboundDays", "Días de ida", { step: "1", unit: "días", id: "f-out" })),
+            reuse ? derivedList([
+              ["Usos por capa", num(reuse.usesPerLayer)],
+              ["Juegos a comprar", num(reuse.setsToBuy)],
+              ["Inversión", money(reuse.investment.cop)],
+              ["Amortizado por viaje", money(reuse.amortizedPerTrip.cop)],
+            ]) : el("div"),
+          ),
+        );
       }
+      const land = state.logistics.landLeg?.replaceReeferTruck;
+      return el("div", {},
+        el("p", { class: "steplead" }, "La ruta aérea y, si aplica, el tramo terrestre refrigerado que las capas también reemplazan."),
+        card("Carga aérea", grid(
+          numberField("logistics.airRatePerKgCop", "Tarifa aérea", { step: "100", unit: "COP/kg", id: "f-air" }),
+          numberField("logistics.carriersPerShipment", `${cs} por embarque`, { step: "1", id: "f-cps" }),
+          numberField("logistics.shipmentsPerMonth", "Embarques por mes", { step: "1", id: "f-spm" }),
+          numberField("logistics.airDistanceKm", "Distancia aérea", { step: "100", unit: "km", id: "f-adist" }),
+        )),
+        card("Tramo terrestre",
+          switchField("logistics.landLeg.replaceReeferTruck", "Reemplazar el camión refrigerado del tramo terrestre", "f-land"),
+          land ? el("div", {}, el("div", { style: "height:8px" }), grid(
+            numberField("logistics.landLeg.carriersPerTruck", `${cs} por camión`, { step: "1", id: "f-lcpt" }),
+            numberField("logistics.landLeg.reeferTruckCostCop", "Costo del camión refrigerado", { step: "10000", unit: "COP", id: "f-ltruck" }),
+            numberField("logistics.landLeg.reeferPremiumPct", "Sobrecosto del refrigerado", { step: "1", scale: 100, unit: "%", id: "f-lprem" }),
+            numberField("logistics.landLeg.reeferHoursPerTruck", "Horas de refrigeración por camión", { step: "0.5", unit: "h", id: "f-lhrs" }),
+          )) : el("div"),
+        ),
+      );
     }
 
-    function renderResult(out) {
+    function derivedList(items) {
+      const row = el("div", { class: "derived" });
+      for (const [lab, val] of items) {
+        row.append(el("div", {}, el("div", { class: "lab" }, lab), el("div", { class: "val" }, val)));
+      }
+      return row;
+    }
+
+    function stepSpoilage(out) {
+      const recovered = state.spoilage.spoilagePct * (state.spoilage.coldChainSharePct - state.spoilage.residualSharePct);
+      return el("div", {},
+        el("p", { class: "steplead" }, "De toda tu merma, la parte que ocurre por cadena de frío es la que las capas recuperan."),
+        card(null,
+          grid(
+            numberField("spoilage.spoilagePct", "Merma total", { step: "0.5", scale: 100, unit: "%", id: "f-sp" }),
+            numberField("spoilage.coldChainSharePct", "Parte por cadena de frío", { step: "0.5", scale: 100, unit: "%", id: "f-cc" }),
+            numberField("spoilage.residualSharePct", "Merma residual con capas", { step: "0.5", scale: 100, unit: "%", id: "f-res" }),
+          ),
+          derivedList([
+            ["Fracción recuperada", pct(recovered)],
+            [`Valor recuperado por ${out.eventLabel === "trip" ? "viaje" : "embarque"}`, money(out.monetary.recoveredValue.perEvent.cop)],
+            ["Perecederos salvados (año)", `${num(out.perishables.annualKg)} kg`],
+          ]),
+        ),
+      );
+    }
+
+    function stepResults(out) {
       const event = out.eventLabel === "trip" ? "viaje" : "embarque";
       const m = out.monetary;
       const investment = out.reuse ? out.reuse.investment : m.nfInvestment.perEvent;
 
-      document.getElementById("kpis").innerHTML = `
-        <div class="kpi">
-          <div class="lab">Beneficio por ${event}</div>
-          <div class="val ${m.total.perEvent.cop >= 0 ? "good" : "bad"}">${cop(m.total.perEvent.cop)}</div>
-          <div class="sub">${usd(m.total.perEvent.usd)}</div>
-        </div>
-        <div class="kpi">
-          <div class="lab">Beneficio anual</div>
-          <div class="val ${m.total.annual.cop >= 0 ? "good" : "bad"}">${cop(m.total.annual.cop)}</div>
-          <div class="sub">${usd(m.total.annual.usd)}</div>
-        </div>
-        <div class="kpi">
-          <div class="lab">Inversión en capas</div>
-          <div class="val">${cop(investment.cop)}</div>
-          <div class="sub">${out.reuse ? `${num(out.reuse.setsToBuy)} juegos · ${num(out.reuse.usesPerLayer)} usos por capa` : `por ${event} (un solo uso)`}</div>
-        </div>
-        <div class="kpi">
-          <div class="lab">ROI</div>
-          <div class="val ${m.roi >= 0 ? "good" : "bad"}">${pct(m.roi)}</div>
-          <div class="sub">${m.positiveFromFirstEvent ? `Positivo desde el primer ${event}` : `Aún no se paga en el primer ${event}`}</div>
-        </div>
-        <div class="kpi">
-          <div class="lab">CO₂ evitado (año)</div>
-          <div class="val good">${num(out.environmental.annualTons, 1)} t</div>
-          <div class="sub">${num(out.environmental.annualKg)} kg CO₂e</div>
-        </div>
-        <div class="kpi">
-          <div class="lab">Perecedero recuperado (año)</div>
-          <div class="val good">${num(out.perishables.annualKg)} kg</div>
-          <div class="sub">${num(out.perishables.annualUnits)} unidades</div>
-        </div>`;
-
-      // Column set depends on the market: export has no layer-life horizon.
       const cols = [["perEvent", `Por ${event}`], ["perMonth", "Por mes"], ["annual", "Anual"]];
       if (out.horizonMonths !== null) cols.push(["perHorizon", `Vida de la capa (${num(out.horizonMonths, 1)} meses)`]);
-
-      document.getElementById("flow-head").innerHTML =
-        `<th>Concepto</th>${cols.map(([, label]) => `<th>${label}</th>`).join("")}`;
 
       const rows = [
         ["Ahorro en transporte", m.transportSavings, false],
@@ -320,31 +546,115 @@
         ["Costo extra (peso / flete)", m.extraCost, true],
         ["Total", m.total, false],
       ];
-      document.getElementById("flows").innerHTML = rows.map(([label, flow, isCost]) => {
-        const cells = cols.map(([key]) => {
-          const money = flow[key];
-          if (!money) return `<td>—</td>`;
-          // Costs are subtracted by the engine; show them as negatives so the
-          // column reads as a sum down to the total.
-          const value = isCost ? -money.cop : money.cop;
-          return `<td class="${value < 0 ? "neg" : ""}">${cop(value)}</td>`;
-        }).join("");
-        return `<tr class="${label === "Total" ? "total" : ""}"><td>${label}</td>${cells}</tr>`;
-      }).join("");
 
-      const savings = m.savingsPctVsReefer;
-      document.getElementById("assumptions-note").textContent =
-        `${capasScenarioLabel(out.market, out.packaging, "es")} · ${num(out.eventsPerMonth)} ${event}s por mes · ` +
-        `TRM ${cop(out.assumptions.copPerUsd)}/USD` +
-        (savings !== null ? ` · ahorro vs. refrigerado: ${pct(savings)}` : "");
+      const table = el("table");
+      table.innerHTML = `
+        <thead><tr><th>Concepto</th>${cols.map(([, l]) => `<th>${l}</th>`).join("")}</tr></thead>
+        <tbody>${rows.map(([label, flow, isCost]) => {
+          const cells = cols.map(([key]) => {
+            const v = flow[key];
+            if (!v) return "<td>—</td>";
+            // Costs are subtracted by the engine; show them negative so the
+            // column reads as a sum down to the total.
+            const value = isCost ? -v.cop : v.cop;
+            return `<td class="${value < 0 ? "neg" : ""}">${money(value)}</td>`;
+          }).join("");
+          return `<tr class="${label === "Total" ? "total" : ""}"><td>${label}</td>${cells}</tr>`;
+        }).join("")}</tbody>`;
+
+      const payback = m.positiveFromFirstEvent
+        ? `Positivo desde el primer ${event}`
+        : `Aún no se paga en el primer ${event}`;
+
+      return el("div", {},
+        el("p", { class: "steplead" }, `Con estos supuestos, así queda tu caso — ${num(out.eventsPerMonth)} ${event}s por mes.`),
+        card("Resumen", derivedList([
+          [`Beneficio por ${event}`, money(m.total.perEvent.cop)],
+          ["Beneficio anual", `${money(m.total.annual.cop)} · ${usd(m.total.annual.usd)}`],
+          ["Inversión en capas", money(investment.cop)],
+          ["Retorno", `${roiFmt(m.roi)} — ${payback}`],
+          ["CO₂ evitado (año)", `${num(out.environmental.annualTons, 1)} t`],
+          ["Perecederos salvados (año)", `${num(out.perishables.annualKg)} kg · ${num(out.perishables.annualUnits)} unidades`],
+        ])),
+        card("Detalle", el("div", { class: "scroll" }, table),
+          el("p", { class: "note" },
+            `TRM ${money(out.assumptions.copPerUsd)}/USD` +
+            (m.savingsPctVsReefer !== null ? ` · ahorro vs. refrigerado: ${pct(m.savingsPctVsReefer)}` : "") +
+            " · el USD es referencial, no una tasa en vivo.")),
+        el("div", { class: "ctas no-print" },
+          el("button", { class: "btn btn-primary", type: "button", onclick: () => window.print() }, "Descargar el caso"),
+          el("a", { class: "btn", href: "https://nanofreeze.tech", target: "_blank", rel: "noopener" }, "Conocer NanoFreeze"),
+        ),
+      );
     }
 
-    function render() {
-      renderScenario();
-      renderLayers();
-      renderProduct();
-      renderLogistics();
-      renderResult(computeCapas(state));
+    // ── Render ────────────────────────────────────────────────────
+    function renderMetrics(out) {
+      const metrics = [
+        ["Ahorro anual", money(out.monetary.total.annual.cop), true],
+        ["CO₂ evitado (t/año)", num(out.environmental.annualTons, 1), false],
+        ["Perecederos (kg/año)", num(out.perishables.annualKg), false],
+        ["ROI", roiFmt(out.monetary.roi), false],
+      ];
+      document.getElementById("metrics").innerHTML = metrics
+        .map(([lab, val, accent]) => `<div class="metric${accent ? " accent" : ""}"><div class="lab">${lab}</div><div class="val">${val}</div></div>`)
+        .join("");
+    }
+
+    function renderRail() {
+      const rail = document.getElementById("rail");
+      rail.innerHTML = "";
+      STEPS.forEach((s, i) => {
+        const done = i < stepIndex;
+        const b = el("button", {
+          type: "button",
+          class: done ? "done" : "",
+          "aria-current": i === stepIndex ? "step" : null,
+          onclick: () => { if (i <= maxReached) { stepIndex = i; render(); } },
+        }, el("span", { class: "n" }, done ? "✓" : String(i + 1)), s.label);
+        if (i > maxReached) b.disabled = true;
+        rail.append(b);
+      });
+    }
+
+    function render({ keepFocus } = {}) {
+      const out = computeCapas(state);
+      const step = STEPS[stepIndex];
+
+      document.getElementById("step-title").textContent = step.label;
+      document.getElementById("step-desc").textContent = step.desc;
+      document.getElementById("step-count").textContent = `Paso ${stepIndex + 1} de ${STEPS.length}`;
+      renderMetrics(out);
+      renderRail();
+
+      const body = document.getElementById("step-body");
+      body.innerHTML = "";
+      const view = { scenario: stepScenario, product: stepProduct, logistics: stepLogistics, spoilage: stepSpoilage, results: stepResults }[step.id];
+      body.append(view(out));
+
+      const back = document.getElementById("back");
+      const next = document.getElementById("next");
+      back.disabled = stepIndex === 0;
+      back.onclick = () => { stepIndex = Math.max(0, stepIndex - 1); render(); };
+      next.style.display = step.cta ? "" : "none";
+      next.textContent = step.cta ?? "";
+      next.onclick = () => {
+        stepIndex = Math.min(STEPS.length - 1, stepIndex + 1);
+        maxReached = Math.max(maxReached, stepIndex);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        render();
+      };
+
+      // Typing re-renders the whole step, which would drop the caret. Restore
+      // focus + caret on the field the user is in.
+      if (keepFocus) {
+        const field = document.getElementById(keepFocus);
+        if (field) {
+          const end = field.value.length;
+          field.focus();
+          if (field.type !== "number") field.setSelectionRange(end, end);
+        }
+      }
     }
 
     render();
