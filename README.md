@@ -126,20 +126,20 @@ Money is always `{ cop, usd }` with `usd = cop / copPerUsd`. The full input and
 output contracts live in [`src/capas/types.ts`](./src/capas/types.ts); parity
 against the source workbook is locked in [`src/capas.test.ts`](./src/capas.test.ts).
 
-## Demo
+## The calculator
 
-Two self-contained calculator pages live in [`demo/`](./demo) — no bundler, no
-framework; they import the built `dist/` directly. Build the package, then serve
-it:
+The public calculator — **live at
+[opensource.nanofreeze.tech/cold-chain/calculator](https://opensource.nanofreeze.tech/cold-chain/calculator/)**
+— lives in [`demo/`](./demo). One page, no bundler, no framework: it imports the
+built `dist/` directly. It runs the **cost & impact model** (`./capas`): the four
+scenarios, layer sizing guided from box length + heat sensitivity, an editable
+assumptions panel, CO₂ and perishables. Seeded with the workbook's worked
+examples, so a freshly-loaded scenario reproduces the parity fixtures in
+[`src/capas.test.ts`](./src/capas.test.ts).
 
 ```bash
-npm install && npm run build && npm run demo
+npm install && npm run demo   # builds dist/ + site/, serves it on :4173
 ```
-
-| Page | Model |
-|---|---|
-| [`demo/index.html`](./demo/index.html) | **Cost & impact (v2, `capas`)** — the four scenarios, guided layer sizing from box length + heat sensitivity, CO₂ and perishables. Seeded with the workbook's worked examples, so a freshly-loaded scenario reproduces the parity fixtures in [`src/capas.test.ts`](./src/capas.test.ts). |
-| [`demo/revenue-uplift.html`](./demo/revenue-uplift.html) | **Revenue uplift (v1)** — per-trip differential, lifetime gain, ROI, payback. |
 
 ## Develop
 
