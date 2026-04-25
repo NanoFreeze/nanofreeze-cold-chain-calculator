@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { useOutletContext, useParams } from "react-router-dom"
 import ActionButton from "../../../Components/ActionButton"
 import DataState from "../../../Components/DataState"
-import { useClientData } from "../Hooks/useClientData"
 import { useHierarchyConfig } from "../Hooks/useHierarchyConfig"
 import { TEMPLATE_OPTIONS } from "../Hierarchy/defaultConfigs"
-import { ChevronRight, Plus, Trash2, ArrowUp, ArrowDown, RotateCcw, Save } from "lucide-react"
+import { Plus, Trash2, ArrowUp, ArrowDown, RotateCcw, Save } from "lucide-react"
 
 const slugify = (s) =>
     s
@@ -27,8 +26,7 @@ const ensureUniqueKey = (base, existing, ignoreIndex = -1) => {
 
 const HierarchySettings = () => {
     const { id_client } = useParams()
-    const { data: clientData, loading: clientLoading, error: clientError } = useClientData(id_client)
-    const client = clientData?.[0]
+    const { client } = useOutletContext() ?? {}
 
     const { config, loading: configLoading, updateConfig, resetConfig } = useHierarchyConfig(id_client)
     const [draft, setDraft] = useState(null)
@@ -114,32 +112,13 @@ const HierarchySettings = () => {
 
     return (
         <div>
-            <div className="flex items-center gap-2 pb-4 text-sm text-[var(--color-subtitle)]">
-                <Link to="/clients" className="cursor-pointer hover:font-semibold text-inherit no-underline">
-                    Clientes
-                </Link>
-
-                <ChevronRight className="w-4 h-4" />
-
-                <Link
-                    to={`/clients/${id_client}`}
-                    className="cursor-pointer hover:font-semibold text-inherit no-underline"
-                >
-                    {client?.name ?? ""}
-                </Link>
-
-                <ChevronRight className="w-4 h-4" />
-
-                <span className="font-semibold">Jerarquía</span>
-            </div>
-
             <DataState
-                loading={clientLoading || configLoading || !draft}
-                error={clientError}
-                isEmpty={!client}
+                loading={configLoading || !draft}
+                error={null}
+                isEmpty={false}
                 loadingText="Cargando configuración..."
-                errorText="Error al cargar el cliente"
-                emptyText="Cliente no encontrado"
+                errorText="Error al cargar la configuración"
+                emptyText=""
             >
                 <div className="flex flex-col gap-8">
                     <div className="flex justify-between items-start gap-6">

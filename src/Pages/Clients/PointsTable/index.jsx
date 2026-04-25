@@ -6,7 +6,7 @@ import StatusTag from "../../../Components/StatusTag"
 import { STATUS_STYLES } from "../../../Components/StatusTag/status.styles"
 import { Store, MapPin, SquarePen } from "lucide-react"
 
-const PointsTable = ({ data }) => {
+const PointsTable = ({ data, onEdit, editPendingHint = "" }) => {
 
     const navigate = useNavigate()
 
@@ -67,10 +67,12 @@ const PointsTable = ({ data }) => {
                 
             case "edit":
                 return (
-                    <div onClick={(e) => e.stopPropagation()}>
+                    <div onClick={(e) => e.stopPropagation()} title={onEdit ? "" : editPendingHint}>
                         <ActionButton
                             variant="secondaryIcon"
                             icon={SquarePen}
+                            disabled={!onEdit}
+                            onClick={onEdit ? () => onEdit(row) : undefined}
                         />
                     </div>
                 )
@@ -78,7 +80,7 @@ const PointsTable = ({ data }) => {
             default:
                 return row[key]
         }
-    }, [])
+    }, [onEdit, editPendingHint])
 
     return (
         <GenericTable
