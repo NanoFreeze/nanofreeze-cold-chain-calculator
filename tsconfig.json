@@ -1,20 +1,60 @@
+// The Next.js app. The PUBLISHED npm package is built by tsconfig.build.json —
+// the two are deliberately separate: this one is bundler-resolution + JSX, that
+// one emits native ESM (nodenext, .js specifiers) into dist/.
 {
-  "//": "Standalone on purpose — does NOT extend the monorepo tsconfig.base, so this folder can be copied verbatim into its own open-source repo and just work. Native-ESM (nodenext) with .js import specifiers, so the built dist runs in Node AND the browser (see demo/).",
   "compilerOptions": {
     "target": "ES2022",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "lib": ["ES2022"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "ES2022"
+    ],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
     "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noUncheckedIndexedAccess": true,
-    "declaration": true,
+    "allowJs": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "incremental": true,
     "noEmit": true,
-    "outDir": "./dist"
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      // The app imports the engine under its PUBLISHED name, exactly as
+      // @nanofreeze/cold-chain-ui does in the monorepo. Two payoffs: a component
+      // can move between the two repos without touching an import, and the seam
+      // stays visible — the app consumes the engine, it never re-derives the math.
+      "@nanofreeze/coldchain-calc/capas": [
+        "./src/capas/index.ts"
+      ],
+      "@nanofreeze/coldchain-calc/capas/*": [
+        "./src/capas/*"
+      ]
+    }
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "out"
+  ]
 }

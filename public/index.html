@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cold-Chain Calculator · NanoFreeze</title>
+    <!-- Root redirect. A static export has no middleware, so nothing can detect
+         the browser language and rewrite "/" server-side the way the marketing
+         site does. This file ships as out/index.html (Next copies public/
+         verbatim) and does the same job in the browser: remember the visitor's
+         last choice, else read navigator.language, else fall back to Spanish.
+
+         The <noscript> meta refresh keeps "/" working without JS. -->
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href="/es/" />
+    <script>
+      (function () {
+        var locale = "es";
+        try {
+          var stored = localStorage.getItem("NEXT_LOCALE");
+          if (stored === "es" || stored === "en") locale = stored;
+          else if ((navigator.language || "").toLowerCase().indexOf("en") === 0) locale = "en";
+        } catch {}
+        location.replace("/" + locale + "/" + location.search + location.hash);
+      })();
+    </script>
+    <noscript>
+      <meta http-equiv="refresh" content="0; url=/es/" />
+    </noscript>
+  </head>
+  <body></body>
+</html>

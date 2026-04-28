@@ -1,0 +1,47 @@
+@import "tailwindcss";
+@import "../styles/theme.css";
+@import "../styles/utilities.css";
+
+/* Register the font CSS vars with Tailwind so `font-sans` / `font-mono` are
+ * generated. The values are set by next/font on <html> via the Geist({ variable })
+ * calls in [locale]/layout.tsx. theme.css already paints canvas/fg on html+body,
+ * so dark mode needs nothing here. */
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+html,
+body {
+  font-family:
+    var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+    sans-serif;
+}
+
+/* Every number the user reads — KPI values, table cells, derived readouts —
+ * sits in a column where digits should line up. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The wordmark SVG is black artwork; invert it on dark rather than shipping a
+ * second asset. */
+.dark .wordmark {
+  filter: invert(1) brightness(1.6);
+}
+
+/* Print — "Download the case" is window.print(). Strip the chrome (nav, rail,
+ * toggles, footer) and let the results table run full width on white. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .sticky {
+    position: static !important;
+  }
+}

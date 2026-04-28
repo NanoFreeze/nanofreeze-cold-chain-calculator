@@ -126,28 +126,50 @@ Money is always `{ cop, usd }` with `usd = cop / copPerUsd`. The full input and
 output contracts live in [`src/capas/types.ts`](./src/capas/types.ts); parity
 against the source workbook is locked in [`src/capas.test.ts`](./src/capas.test.ts).
 
-## The calculator
+## The calculator app
 
-The public calculator — **live at
-[opensource.nanofreeze.tech/cold-chain/calculator](https://opensource.nanofreeze.tech/cold-chain/calculator/)**
-— lives in [`demo/`](./demo). One page, no bundler, no framework: it imports the
-built `dist/` directly. It runs the **cost & impact model** (`./capas`): the four
-scenarios, layer sizing guided from box length + heat sensitivity, an editable
-assumptions panel, CO₂ and perishables. Seeded with the workbook's worked
-examples, so a freshly-loaded scenario reproduces the parity fixtures in
-[`src/capas.test.ts`](./src/capas.test.ts).
+This repo is **two things in one**: the pure engine above (published to npm), and
+a **Next.js app** that wraps it in a five-step wizard — the public calculator,
+**live at
+[opensource.nanofreeze.tech/cold-chain/calculator](https://opensource.nanofreeze.tech/cold-chain/calculator/)**.
+
+The app is App Router + React 19 + Tailwind v4 + next-intl (ES/EN), themed with
+NanoFreeze's design tokens (light/dark/system). It runs the **cost & impact
+model** (`./capas`): the four scenarios, layer sizing guided from box length +
+heat sensitivity, an editable assumptions drawer, CO₂ and perishables. Each
+scenario is seeded with the workbook's worked examples, so a freshly-loaded case
+reproduces the parity fixtures in [`src/capas.test.ts`](./src/capas.test.ts).
+
+It builds to a **static export** (`output: "export"`) — no server, no API, all
+calculation in the browser. That's what makes it forkable: `npm run build`
+produces an `out/` directory you can drop on GitHub Pages, Netlify, Vercel, S3,
+or any static host.
 
 ```bash
-npm install && npm run demo   # builds dist/ + site/, serves it on :4173
+npm install
+npm run dev      # dev server on http://localhost:4173
+npm run build    # static site → out/   (also copies public/ index.html root redirect)
+npm start        # serve the built out/ locally on :4173
 ```
 
-## Develop
+The app source: [`app/`](./app) (routes + layout), [`components/`](./components)
+(wizard, theme, chrome), [`messages/`](./messages) (ES/EN copy), [`i18n/`](./i18n),
+[`styles/`](./styles) (design tokens). The app imports the engine under its
+published name (`@nanofreeze/coldchain-calc/capas`) via a tsconfig path alias, so
+it never re-implements the math — [`src/`](./src) stays the single source of truth.
+
+## Develop the engine
 
 ```bash
-npm run build      # emit dist/ (ESM + .d.ts)
+npm run build:lib   # emit dist/ (ESM + .d.ts) — the published package
 npm run typecheck
-npm test           # vitest
+npm test            # vitest — engine parity + sizing
 ```
+
+`dist/` is built from [`tsconfig.build.json`](./tsconfig.build.json) (native ESM,
+`.js` specifiers) and is what `npm publish` ships — its only runtime dependency is
+`zod`. The Next.js toolchain (Next, React, Tailwind) is a devDependency and never
+reaches a consumer of the package.
 
 ## License
 

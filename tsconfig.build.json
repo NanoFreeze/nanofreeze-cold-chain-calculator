@@ -1,7 +1,16 @@
 {
-  "extends": "./tsconfig.json",
+  "//": "Builds the PUBLISHED npm package (dist/). Standalone on purpose — it no longer extends tsconfig.json, because that one now configures the Next.js app (bundler resolution + JSX). The package must stay native-ESM (nodenext, .js import specifiers) so dist/ runs in Node, in a browser, and in any bundler.",
   "compilerOptions": {
-    "noEmit": false,
+    "target": "ES2022",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

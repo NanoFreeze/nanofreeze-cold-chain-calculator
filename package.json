@@ -58,23 +58,36 @@
   "files": [
     "dist",
     "src",
-    "demo",
     "package.json",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "dev": "next dev --webpack -p 4173",
+    "build": "next build --webpack",
+    "start": "npx --yes serve out -l 4173",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "site": "npm run build && node scripts/build-site.mjs",
-    "demo": "npm run site && npx --yes serve site -l 4173"
+    "build:lib": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build:lib"
   },
+  "//deps": "The PUBLISHED package is the engine in dist/ — its only runtime dependency is zod. Next, React and Tailwind build the app in this repo; they are devDependencies on purpose, because `npm i @nanofreeze/coldchain-calc` must not drag a web framework into someone else's project.",
   "dependencies": {
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.1",
+    "next": "16.2.9",
+    "next-intl": "^4.13.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "16.2.9",
+    "tailwindcss": "^4.3.1",
     "typescript": "^5.9.3",
     "vitest": "^4.1.9"
   }

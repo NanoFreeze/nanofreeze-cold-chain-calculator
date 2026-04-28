@@ -1,0 +1,90 @@
+/* Utility classes — vendored from @nanofreeze/theme/utilities.css.
+ *
+ * Only the utilities this app actually uses are here; the monorepo's file also
+ * carries admin-density variants (btn-*-xs, chips, list-table shells) that no
+ * calculator surface touches. Names and @apply bodies are otherwise verbatim,
+ * so a component moving between the two repos keeps its classes.
+ *
+ * Note for anyone adding a variant: these are on-demand Tailwind v4 @utility
+ * rules, so a class only exists if Tailwind sees it spelled out literally in
+ * scanned source. `btn-${variant}` never generates. Use a lookup table of
+ * literal strings (see the monorepo's ui/Button.tsx).
+ */
+
+/* Tap targets — guarantee a ≥44×44 hit area. Every interactive control on a
+ * customer-facing surface either is one or wraps in one. */
+@utility tap-target {
+  @apply inline-flex items-center justify-center min-h-11 min-w-11;
+}
+@utility table-responsive {
+  @apply w-full overflow-x-auto;
+}
+
+/* Buttons */
+@utility btn-primary {
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-control text-sm font-medium bg-primary text-primary-fg hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+@utility btn-primary-sm {
+  @apply inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-control text-sm font-medium bg-primary text-primary-fg hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+@utility btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-control text-sm font-medium bg-surface text-fg border border-border hover:bg-surface-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+@utility btn-secondary-sm {
+  @apply inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-control text-sm font-medium bg-surface text-fg border border-border hover:bg-surface-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+@utility btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-control text-sm font-medium text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors disabled:opacity-50;
+}
+@utility btn-icon {
+  @apply inline-flex items-center justify-center rounded-control border border-border text-fg-muted hover:bg-surface-hover hover:text-fg px-2 py-1 text-sm transition-colors;
+}
+
+/* Cards / panels */
+@utility card {
+  @apply bg-surface border border-border/50 rounded-card;
+}
+@utility card-strong {
+  @apply bg-surface border border-border rounded-card;
+}
+@utility panel {
+  @apply bg-surface border border-border/50 rounded-card overflow-hidden;
+}
+
+/* Form fields */
+@utility input {
+  @apply w-full px-3 py-2 text-sm bg-surface text-fg border border-border-strong rounded-control placeholder:text-fg-subtle focus:outline-none focus:ring-2 focus:ring-ring;
+}
+@utility input-sm {
+  @apply w-full px-3 py-1.5 text-sm bg-surface text-fg border border-border-strong rounded-control placeholder:text-fg-subtle focus:outline-none focus:ring-2 focus:ring-ring;
+}
+@utility field-label {
+  @apply block text-xs font-medium text-fg-muted mb-1;
+}
+
+/* Badges */
+@utility badge-neutral {
+  @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-muted text-fg-muted;
+}
+@utility badge-accent {
+  @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent/10 text-accent;
+}
+
+/* Typography */
+@utility eyebrow {
+  /* Color-agnostic on purpose — the caller adds the colour, so the same label
+   * shape composes as a section eyebrow and as a status label. */
+  @apply font-mono text-[11px] font-semibold uppercase tracking-[0.16em];
+}
+@utility heading-page {
+  @apply text-2xl font-semibold text-fg;
+}
+@utility heading-section {
+  @apply text-lg font-semibold text-fg;
+}
+@utility heading-card {
+  @apply text-sm font-medium text-fg;
+}
+@utility text-meta {
+  @apply text-xs text-fg-muted;
+}

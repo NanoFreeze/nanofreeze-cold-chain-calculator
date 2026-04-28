@@ -1,0 +1,219 @@
+/* Design tokens — vendored from @nanofreeze/theme (Design System v2,
+ * "futurist minimalist": one steel-cyan accent, radius 0, near-black dark mode).
+ *
+ * Vendored rather than depended on, because @nanofreeze/theme is a private
+ * workspace package and this repo has to `npm install` for a stranger. Values
+ * are copied verbatim — if they drift here, the fork stops looking like
+ * NanoFreeze, so treat the monorepo's packages/theme/src/theme.css as upstream
+ * and re-copy rather than hand-edit.
+ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Surfaces — light theme (stark white + faint structure) */
+  --color-canvas: #eef0f3;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f6f7f9;
+  --color-muted: #ebedf1;
+  --color-overlay: rgb(10 12 15 / 35%);
+
+  /* Text */
+  --color-fg: #0a0c0f;
+  --color-fg-muted: #6b7178;
+  --color-fg-subtle: #9aa1a9;
+  --color-fg-label: #3a4048;
+
+  /* Borders / hairlines */
+  --color-border: #e2e5ea;
+  --color-border-strong: #d1d6dd;
+  --color-border-subtle: #ebedf1;
+
+  /* Primary action — steel cyan, darkened for contrast on white */
+  --color-primary: #2b6e89;
+  --color-primary-hover: #225b73;
+  --color-primary-fg: #ffffff;
+
+  /* Text/icon color painted OVER an accent fill (buttons, toggles) */
+  --color-on-accent: #ffffff;
+
+  --color-accent: #2b6e89;
+  --color-accent-hover: #225b73;
+
+  --color-ring: #2b6e89;
+
+  --color-danger: #d3344f;
+  --color-danger-soft: #fbeaed;
+  --color-danger-fg: #b02a42;
+
+  --color-success: #0f9d63;
+  --color-success-soft: #e7f6ee;
+  --color-success-fg: #0c7d4f;
+
+  --color-warning: #a9790a;
+  --color-warning-soft: #f7f0dd;
+  --color-warning-fg: #855f08;
+
+  --color-info: #2b6e89;
+  --color-info-soft: #e3eef3;
+  --color-info-fg: #225b73;
+
+  --color-skeleton: #e2e5ea;
+
+  --color-brand-primary: #2b6e89;
+  --color-brand-primary-hover: #225b73;
+  --color-brand-secondary: #3c95b8;
+  --color-brand-accent: #175668;
+
+  /* Radii — sharpened. 0 = "Edge" (default). Use 2px for "Hair". */
+  --radius-control: 0px;
+  --radius-card: 0px;
+  --radius-modal: 0px;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --color-canvas: #07080a;
+  --color-surface: #0d0f13;
+  --color-surface-hover: #14171c;
+  --color-muted: #14171c;
+  --color-overlay: rgb(0 0 0 / 65%);
+
+  --color-fg: #e8ebef;
+  --color-fg-muted: #868d97;
+  --color-fg-subtle: #565c66;
+  --color-fg-label: #b4bac2;
+
+  --color-border: #1b1f26;
+  --color-border-strong: #262b33;
+  --color-border-subtle: #14171c;
+
+  /* Accent is the pure steel-cyan in dark; on-accent is near-black so text
+   * reads on the cyan fill. */
+  --color-primary: #3c95b8;
+  --color-primary-hover: #5aabca;
+  --color-primary-fg: #07080a;
+  --color-on-accent: #07080a;
+
+  --color-accent: #3c95b8;
+  --color-accent-hover: #5aabca;
+
+  --color-ring: #3c95b8;
+
+  --color-danger: #e3576b;
+  --color-danger-soft: rgba(227, 87, 107, 0.12);
+  --color-danger-fg: #e3576b;
+
+  --color-success: #3be09a;
+  --color-success-soft: rgba(59, 224, 154, 0.12);
+  --color-success-fg: #3be09a;
+
+  --color-warning: #e3c34f;
+  --color-warning-soft: rgba(227, 195, 79, 0.12);
+  --color-warning-fg: #e3c34f;
+
+  --color-info: #3c95b8;
+  --color-info-soft: rgba(60, 149, 184, 0.14);
+  --color-info-fg: #5aabca;
+
+  --color-skeleton: #1b1f26;
+
+  --color-brand-primary: #3c95b8;
+  --color-brand-primary-hover: #5aabca;
+  --color-brand-secondary: #62afcd;
+  --color-brand-accent: #93cbe0;
+}
+
+/* Expose tokens to Tailwind (bg-canvas, text-fg, border-border, rounded-card,
+ * bg-accent, text-on-accent, …). `inline` keeps the var() reference so tokens
+ * swap at runtime when .dark lands on <html>. */
+@theme inline {
+  --color-canvas: var(--color-canvas);
+  --color-surface: var(--color-surface);
+  --color-surface-hover: var(--color-surface-hover);
+  --color-muted: var(--color-muted);
+  --color-overlay: var(--color-overlay);
+
+  --color-fg: var(--color-fg);
+  --color-fg-muted: var(--color-fg-muted);
+  --color-fg-subtle: var(--color-fg-subtle);
+  --color-fg-label: var(--color-fg-label);
+
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-border-subtle: var(--color-border-subtle);
+
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-fg: var(--color-primary-fg);
+  --color-on-accent: var(--color-on-accent);
+
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+
+  --color-ring: var(--color-ring);
+
+  --color-danger: var(--color-danger);
+  --color-danger-soft: var(--color-danger-soft);
+  --color-danger-fg: var(--color-danger-fg);
+
+  --color-success: var(--color-success);
+  --color-success-soft: var(--color-success-soft);
+  --color-success-fg: var(--color-success-fg);
+
+  --color-warning: var(--color-warning);
+  --color-warning-soft: var(--color-warning-soft);
+  --color-warning-fg: var(--color-warning-fg);
+
+  --color-info: var(--color-info);
+  --color-info-soft: var(--color-info-soft);
+  --color-info-fg: var(--color-info-fg);
+
+  --color-skeleton: var(--color-skeleton);
+
+  --color-brand-primary: var(--color-brand-primary);
+  --color-brand-secondary: var(--color-brand-secondary);
+  --color-brand-accent: var(--color-brand-accent);
+
+  --radius-control: var(--radius-control);
+  --radius-card: var(--radius-card);
+  --radius-modal: var(--radius-modal);
+}
+
+/* The `eui-*` bridge. In the monorepo the cold-chain wizard components are
+ * written against @nanofreeze/energy-ui's token names (bg-eui-card,
+ * text-eui-fg-muted, border-eui-border, …) — a legacy alias layer that exists
+ * for reasons that don't apply here. Rather than rename every class and make
+ * the components diverge from their upstream, alias the names onto our tokens.
+ * The wizard tree then stays copy-paste-compatible with the monorepo in both
+ * directions. */
+@theme inline {
+  --color-eui-canvas: var(--color-canvas);
+  --color-eui-card: var(--color-surface);
+  --color-eui-card-hover: var(--color-surface-hover);
+  --color-eui-fg: var(--color-fg);
+  --color-eui-fg-muted: var(--color-fg-muted);
+  --color-eui-fg-subtle: var(--color-fg-subtle);
+  --color-eui-border: var(--color-border);
+  --color-eui-border-subtle: var(--color-border-subtle);
+  --color-eui-border-strong: var(--color-border-strong);
+  --color-eui-accent: var(--color-accent);
+  --color-eui-accent-hover: var(--color-accent-hover);
+  --color-eui-on-accent: var(--color-on-accent);
+  --color-eui-danger: var(--color-danger);
+  --color-eui-danger-soft: var(--color-danger-soft);
+  --color-eui-success: var(--color-success);
+  --color-eui-success-soft: var(--color-success-soft);
+}
+
+html,
+body {
+  background: var(--color-canvas);
+  color: var(--color-fg);
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}

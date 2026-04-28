@@ -1,5 +1,11 @@
 node_modules/
+
+# build output — dist/ is the published package, out/ is the static site
 dist/
+out/
+.next/
+next-env.d.ts
+*.tsbuildinfo
 
 # env
 .env
@@ -9,4 +15,3 @@ _env
 # editor / os
 .DS_Store
 .claude/
-site/
