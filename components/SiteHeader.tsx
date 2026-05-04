@@ -1,7 +1,7 @@
-import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { assetPath } from "@/lib/assets";
 import { NANOFREEZE_URL, SOURCE_URL } from "@/lib/links";
 
 /** Top bar: wordmark → nanofreeze.tech, language + theme toggles, source link.
@@ -13,13 +13,17 @@ export async function SiteHeader() {
     <header className="no-print border-b border-border bg-surface">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <a href={NANOFREEZE_URL} target="_blank" rel="noopener" aria-label={t("homeAria")}>
-          <Image
-            src="/nanofreeze-logo.svg"
+          {/* Plain <img>, not next/image: it's a static SVG wordmark (no
+              optimization to gain, and images are unoptimized under export
+              anyway), and next/image's loader doesn't reliably prepend basePath
+              to a root-relative src — assetPath() does it deterministically. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={assetPath("/nanofreeze-logo.svg")}
             alt="NanoFreeze"
             width={112}
             height={49}
             className="wordmark h-10 w-auto"
-            priority
           />
         </a>
 

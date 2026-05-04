@@ -6,6 +6,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ThemeInitScript } from "@/components/theme/ThemeInitScript";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { assetPath } from "@/lib/assets";
 import { routing, type Locale } from "@/i18n/routing";
 import "../globals.css";
 
@@ -27,7 +28,7 @@ export async function generateMetadata({
       template: "NanoFreeze — %s",
     },
     description: t("description"),
-    icons: { icon: "/nanofreeze-logo.svg" },
+    icons: { icon: assetPath("/nanofreeze-logo.svg") },
   };
 }
 

@@ -9,9 +9,14 @@
          verbatim) and does the same job in the browser: remember the visitor's
          last choice, else read navigator.language, else fall back to Spanish.
 
-         The <noscript> meta refresh keeps "/" working without JS. -->
+         The <noscript> meta refresh keeps "/" working without JS.
+
+         Redirect targets are RELATIVE ("es/", not "/es/"). This file always
+         sits at the site root, so a relative jump resolves correctly under both
+         hostings: "/" → "/es/" on CloudFront, and "/<repo>/" → "/<repo>/es/" on
+         GitHub Pages. An absolute "/es/" would escape the repo subpath. -->
     <meta name="robots" content="noindex" />
-    <link rel="canonical" href="/es/" />
+    <link rel="canonical" href="es/" />
     <script>
       (function () {
         var locale = "es";
@@ -20,11 +25,11 @@
           if (stored === "es" || stored === "en") locale = stored;
           else if ((navigator.language || "").toLowerCase().indexOf("en") === 0) locale = "en";
         } catch {}
-        location.replace("/" + locale + "/" + location.search + location.hash);
+        location.replace(locale + "/" + location.search + location.hash);
       })();
     </script>
     <noscript>
-      <meta http-equiv="refresh" content="0; url=/es/" />
+      <meta http-equiv="refresh" content="0; url=es/" />
     </noscript>
   </head>
   <body></body>

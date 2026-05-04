@@ -3,6 +3,15 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
+// Base path, env-driven. Two hosts, two shapes:
+//   • opensource.nanofreeze.tech (CloudFront) serves at the domain ROOT → "".
+//   • GitHub Pages serves at nanofreeze.github.io/<repo>/ → "/<repo>".
+// The Pages workflow sets BASE_PATH; every other build (incl. the CloudFront
+// one) leaves it empty. basePath and assetPrefix must move together or the
+// _next/ asset URLs 404 under a subpath. Trailing slash stripped so we never
+// emit a double slash.
+const basePath = (process.env.BASE_PATH ?? "").replace(/\/$/, "");
+
 const nextConfig: NextConfig = {
   // Static export, and it has to stay that way. The public demo is served from
   // a private S3 bucket behind CloudFront on the *.nanofreeze.tech perimeter,
@@ -18,9 +27,16 @@ const nextConfig: NextConfig = {
   // entirely in the browser and has no server to talk to.
   output: "export",
 
+  basePath: basePath || undefined,
+  assetPrefix: basePath || undefined,
+
   // Trailing slashes so `out/es/index.html` resolves at `/es/` on plain static
   // hosts (S3 + CloudFront serve a directory index; without this they 404).
   trailingSlash: true,
+
+  // Static export can't run the image optimizer (there's no server), so the
+  // <Image> for the wordmark is served as-is from public/. Required for `export`.
+  images: { unoptimized: true },
 
   poweredByHeader: false,
 
