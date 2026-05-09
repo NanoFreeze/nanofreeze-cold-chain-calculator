@@ -39,8 +39,14 @@ jobs:
           node-version: "20"
           cache: npm
 
+      # `npm install`, not `npm ci`: next@16 pins @swc/helpers to an exact
+      # version while a transitive dep wants a higher one, so the ideal tree has
+      # two copies — and which copies land in the lock depends on the npm version
+      # that wrote it. `npm ci` fails the build on any such drift; `npm install`
+      # reconciles it in place (the committed lock is still honoured when
+      # consistent). For a static-site deploy that trade is worth it.
       - name: Install
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Build static export
         env:
