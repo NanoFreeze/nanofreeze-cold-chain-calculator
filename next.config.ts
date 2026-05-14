@@ -3,13 +3,14 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
-// Base path, env-driven. Two hosts, two shapes:
-//   • opensource.nanofreeze.tech (CloudFront) serves at the domain ROOT → "".
-//   • GitHub Pages serves at nanofreeze.github.io/<repo>/ → "/<repo>".
-// The Pages workflow sets BASE_PATH; every other build (incl. the CloudFront
-// one) leaves it empty. basePath and assetPrefix must move together or the
-// _next/ asset URLs 404 under a subpath. Trailing slash stripped so we never
-// emit a double slash.
+// Base path, env-driven — because this app is served from a SUBPATH on both of
+// its hosts, and Next emits absolute /_next/… asset URLs that 404 without it:
+//   • production: opensource.nanofreeze.tech/cold-chain/calculator/
+//                 → BASE_PATH=/cold-chain/calculator   (scripts/deploy-opensource.sh)
+//   • GitHub Pages: <owner>.github.io/<repo>/
+//                 → BASE_PATH=/<repo>                  (.github/workflows/deploy-pages.yml)
+// Local dev leaves it empty (served at /). basePath and assetPrefix must move
+// together. Trailing slash stripped so we never emit a double slash.
 const basePath = (process.env.BASE_PATH ?? "").replace(/\/$/, "");
 
 const nextConfig: NextConfig = {
