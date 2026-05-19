@@ -37,14 +37,17 @@ DRY_RUN=false
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
 
 # ── Resolve the stack's bucket + distribution ────────────────────────
+# CI passes BUCKET + DISTRIBUTION_ID directly (env), so the deploy role needs no
+# cloudformation:DescribeStacks permission. A local run leaves them unset and we
+# look them up from the stack outputs.
 stack_output() {
   aws cloudformation describe-stacks \
     --stack-name "$STACK_NAME" --region "$AWS_REGION" \
     --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue" --output text 2>/dev/null
 }
 
-BUCKET="$(stack_output SiteBucketName)"
-DISTRIBUTION_ID="$(stack_output DistributionId)"
+BUCKET="${BUCKET:-$(stack_output SiteBucketName)}"
+DISTRIBUTION_ID="${DISTRIBUTION_ID:-$(stack_output DistributionId)}"
 
 if [[ -z "$BUCKET" || "$BUCKET" == "None" ]]; then
   echo "deploy-opensource: stack '$STACK_NAME' not found (or no SiteBucketName)." >&2

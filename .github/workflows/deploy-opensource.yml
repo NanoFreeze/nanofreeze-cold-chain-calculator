@@ -1,0 +1,66 @@
+name: Deploy to opensource.nanofreeze.tech
+
+# Builds the static export and publishes it to the production URL:
+#   https://opensource.nanofreeze.tech/cold-chain/calculator/
+#
+# Auth is OIDC — no long-lived AWS keys in GitHub. The job exchanges its
+# short-lived GitHub token for the IAM role below, which is scoped to exactly
+# this: write the cold-chain/calculator/ prefix of the bucket, and invalidate
+# this one distribution. Nothing else.
+#
+# The role must exist first (see infra/aws-deploy-role.md). Until it does, this
+# workflow's "Configure AWS credentials" step fails with an assume-role error.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least-privilege token: id-token for the OIDC exchange, contents to checkout.
+permissions:
+  id-token: write
+  contents: read
+
+# One deploy at a time; don't cancel an in-flight publish.
+concurrency:
+  group: deploy-opensource
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  # Not secret — a role ARN, a bucket name, and a distribution id are safe in
+  # source. The security boundary is the role's trust + permission policies.
+  AWS_ROLE: arn:aws:iam::841652051959:role/nanofreeze-github-actions-opensource
+  BUCKET: nanofreezeopensource-sitebucket397a1860-fbgtuzxfztqu
+  DISTRIBUTION_ID: EQ8X4YGXWKQAC
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://opensource.nanofreeze.tech/cold-chain/calculator/
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      # npm install, not npm ci — see the note in deploy-pages history / README:
+      # next@16 pins @swc/helpers exactly while a transitive wants higher, so the
+      # lock's two-copy shape differs by npm version and `npm ci` fails the runner.
+      - name: Install
+        run: npm install --no-audit --no-fund
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # BUCKET + DISTRIBUTION_ID come from env, so the script skips its
+      # CloudFormation lookup and the role needs no describe-stacks permission.
+      - name: Build + sync + invalidate
+        run: bash scripts/deploy-opensource.sh
