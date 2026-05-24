@@ -8,8 +8,12 @@ OIDC identity provider (`token.actions.githubusercontent.com`) already exists.
 
 The role is deliberately minimal:
 
-- **Who can assume it** — only workflows on the **`main`** branch of
-  **this repo**. Not PRs, not other branches, not other repos.
+- **Who can assume it** — only jobs running in this repo's **`production`**
+  GitHub Environment (the deploy workflow pins `environment: production`, and
+  that environment only runs on `main`). Not PRs, not other environments, not
+  other repos. Note: the OIDC `sub` is environment-based, not ref-based —
+  specifying a job `environment:` changes the claim from `ref:…` to
+  `environment:…`, which is why the condition matches on the environment.
 - **What it can do** — write the `cold-chain/calculator/` prefix of the site
   bucket, and invalidate the one CloudFront distribution. No other bucket, no
   other prefix, no other distribution, no CloudFormation, no IAM.
@@ -30,7 +34,7 @@ cat > /tmp/trust.json <<JSON
     "Action": "sts:AssumeRoleWithWebIdentity",
     "Condition": {
       "StringEquals": { "token.actions.githubusercontent.com:aud": "sts.amazonaws.com" },
-      "StringLike": { "token.actions.githubusercontent.com:sub": "repo:NanoFreeze/nanofreeze-cold-chain-calculator:ref:refs/heads/main" }
+      "StringLike": { "token.actions.githubusercontent.com:sub": "repo:NanoFreeze/nanofreeze-cold-chain-calculator:environment:production" }
     }
   }]
 }
