@@ -167,9 +167,10 @@ describe("computeCapas — Nacional · Cajas parity", () => {
     expect(out.perishables.perEvent.kgSaved).toBeCloseTo(144, CLOSE);
   });
 
-  it("USD is COP / 3500", () => {
-    expect(out.monetary.total.perEvent.usd).toBeCloseTo(4_207_722.947761194 / 3_500, CLOSE);
-    expect(out.monetary.recoveredValue.perEvent.usd).toBeCloseTo(3_240_000 / 3_500, CLOSE);
+  it("USD is COP / copPerUsd (default TRM)", () => {
+    const trm = out.assumptions.copPerUsd;
+    expect(out.monetary.total.perEvent.usd).toBeCloseTo(4_207_722.947761194 / trm, CLOSE);
+    expect(out.monetary.recoveredValue.perEvent.usd).toBeCloseTo(3_240_000 / trm, CLOSE);
   });
 
   it("produces no NaN/Infinity anywhere", () => assertAllFinite(out));
@@ -237,7 +238,7 @@ describe("computeCapas — Export · Cajas parity", () => {
     // Export flows: month = event × shipmentsPerMonth; annual = month × 12.
     expect(out.monetary.total.perMonth.cop).toBeCloseTo(18_770_000 * 4, CLOSE);
     expect(out.monetary.total.annual.cop).toBeCloseTo(18_770_000 * 4 * 12, CLOSE);
-    expect(out.monetary.total.perEvent.usd).toBeCloseTo(18_770_000 / 3_500, CLOSE);
+    expect(out.monetary.total.perEvent.usd).toBeCloseTo(18_770_000 / out.assumptions.copPerUsd, CLOSE);
   });
 
   it("environmental + perishables", () => {

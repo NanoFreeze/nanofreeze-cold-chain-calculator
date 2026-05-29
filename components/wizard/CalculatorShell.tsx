@@ -77,10 +77,8 @@ export function CalculatorShell() {
    *  common worth carrying across, and a half-migrated form would quietly mix two
    *  examples' numbers. Reset the reveal too: the new numbers aren't the user's
    *  yet. */
-  function selectScenario(next: { market?: CapasMarket; packaging?: CapasPackaging }) {
-    const market = next.market ?? input.logistics.market;
-    const packaging = next.packaging ?? input.layers.packaging;
-    setInput(presetFor(market, packaging));
+  function selectScenario(next: { market: CapasMarket; packaging: CapasPackaging }) {
+    setInput(presetFor(next.market, next.packaging));
     setRevealed(false);
     setMaxReached(0);
     setStepIndex(0);
@@ -99,6 +97,11 @@ export function CalculatorShell() {
   }
 
   const isLast = stepIndex === steps.length - 1;
+  // Gate "Next" on the current step's inputs being usable, matching the
+  // monorepo: you can't advance past product/logistics with zero/empty key
+  // fields. Scenario and spoilage never block (a preset is always valid; a
+  // spoilage of 0% is a legitimate answer).
+  const canAdvance = stepValid(stepIndex, input);
 
   return (
     <>
@@ -125,7 +128,12 @@ export function CalculatorShell() {
               {t("back")}
             </button>
             {isLast ? null : (
-              <button type="button" className="btn-primary tap-target" onClick={() => go(stepIndex + 1)}>
+              <button
+                type="button"
+                className="btn-primary tap-target"
+                disabled={!canAdvance}
+                onClick={() => go(stepIndex + 1)}
+              >
                 {tSteps(`cta.${steps[stepIndex]?.id ?? "scenario"}`)}
               </button>
             )}
@@ -148,7 +156,9 @@ export function CalculatorShell() {
         {stepIndex === 3 ? (
           <SpoilageStep input={input} output={output} onChange={patchInput} />
         ) : null}
-        {stepIndex === 4 ? <ResultsStep output={output} /> : null}
+        {stepIndex === 4 ? (
+          <ResultsStep output={output} input={input} onChange={patchInput} />
+        ) : null}
       </WizardShell>
 
       <AssumptionsDrawer
@@ -173,6 +183,10 @@ export function CalculatorShell() {
  */
 function withDerivedSizing(input: CapasInput): CapasInput {
   if (input.layers.packaging !== "cajas") return input;
+  // Guided only. In manual mode (boxLengthCm/heatSensitivity cleared) the user
+  // types stripsPerLayer/layersPerBox directly and we must not overwrite them.
+  const guided = input.layers.boxLengthCm != null && input.layers.heatSensitivity != null;
+  if (!guided) return input;
   return {
     ...input,
     layers: {
@@ -181,4 +195,37 @@ function withDerivedSizing(input: CapasInput): CapasInput {
       layersPerBox: layersForSensitivity(input.layers.heatSensitivity ?? "sensible"),
     },
   };
+}
+
+// ── Advance-gating ─────────────────────────────────────────────────────────
+// Mirrors the monorepo's canAdvanceFrom: which steps may be left, given the
+// inputs. Product and logistics need their key fields non-zero; scenario and
+// spoilage are always leavable.
+
+function stepValid(index: number, input: CapasInput): boolean {
+  if (index === 1) return productValid(input);
+  if (index === 2) return logisticsValid(input);
+  return true;
+}
+
+function productValid(input: CapasInput): boolean {
+  const p = input.product;
+  if (!(p.unitsPerCarrier > 0 && p.productKgPerCarrier > 0 && p.valuePerCarrierCop > 0)) {
+    return false;
+  }
+  const l = input.layers;
+  if (l.packaging === "cajas") {
+    const guided = l.boxLengthCm != null && l.heatSensitivity != null;
+    if (guided) return (l.boxLengthCm ?? 0) > 0;
+    return (l.stripsPerLayer ?? 0) > 0 && (l.layersPerBox ?? 0) > 0;
+  }
+  return (l.layersPerPallet ?? 0) > 0 && (l.costPerPalletLayerCop ?? 0) > 0;
+}
+
+function logisticsValid(input: CapasInput): boolean {
+  const g = input.logistics;
+  if (g.market === "nacional") {
+    return g.reeferTruckCostCop > 0 && g.carriersPerTruck > 0 && g.tripsPerMonth > 0;
+  }
+  return g.airRatePerKgCop > 0 && g.carriersPerShipment > 0 && g.shipmentsPerMonth > 0;
 }

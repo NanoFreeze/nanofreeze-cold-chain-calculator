@@ -12,7 +12,7 @@ export const CAPAS_DEFAULT_ASSUMPTIONS: CapasAssumptions = {
   stripsPerNfPallet: 24,
   nfPalletCostCop: 17_400,
   nfPalletWeightKg: 3,
-  copPerUsd: 3_500,
+  copPerUsd: 3_248.87,
   layerLifeDays: 180,
   freezeHours: 36,
   daysPerMonth: 30,

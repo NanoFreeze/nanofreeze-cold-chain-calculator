@@ -68,6 +68,7 @@ function DomesticLogistics({
               field in the wizard does this — the engine speaks 0..1. */}
           <NumberField
             label={t("reeferPremium")}
+            hint={t("reeferPremiumHint")}
             suffix="%"
             value={pctToUi(logistics.reeferPremiumPct)}
             onChange={(v) => patch({ reeferPremiumPct: uiToPct(v) })}
@@ -100,6 +101,7 @@ function DomesticLogistics({
           />
           <NumberField
             label={t("reeferHoursPerTrip")}
+            hint={t("reeferHoursPerTripHint")}
             suffix="h"
             value={logistics.reeferHoursPerTrip}
             onChange={(v) => patch({ reeferHoursPerTrip: v ?? 0 })}
@@ -110,23 +112,41 @@ function DomesticLogistics({
       </StepCard>
 
       <StepCard title={t("reuseTitle")}>
-        <CheckboxField
-          label={t("hasReturnLogistics")}
-          checked={logistics.reuse.hasReturnLogistics}
-          onChange={(checked) =>
-            patch({ reuse: { ...logistics.reuse, hasReturnLogistics: checked } })
-          }
-        />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <NumberField
-            label={t("outboundDays")}
-            hint={t("outboundDaysHint")}
-            value={logistics.reuse.outboundDays}
-            onChange={(v) => patch({ reuse: { ...logistics.reuse, outboundDays: v ?? 0 } })}
-            min={0}
-            step={1}
+        <div>
+          <CheckboxField
+            label={t("hasReturnLogistics")}
+            checked={logistics.reuse.hasReturnLogistics}
+            onChange={(checked) =>
+              patch({ reuse: { ...logistics.reuse, hasReturnLogistics: checked } })
+            }
           />
+          <p className="mt-1 text-[11px] text-eui-fg-muted">{t("hasReturnLogisticsHint")}</p>
         </div>
+
+        {logistics.reuse.hasReturnLogistics ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <NumberField
+              label={t("outboundDays")}
+              hint={t("outboundDaysHint")}
+              value={logistics.reuse.outboundDays}
+              onChange={(v) => patch({ reuse: { ...logistics.reuse, outboundDays: v ?? 0 } })}
+              min={0}
+              step={1}
+            />
+            <NumberField
+              label={t("returnDaysOverride")}
+              hint={t("returnDaysOverrideHint")}
+              value={logistics.reuse.returnDaysOverride ?? null}
+              onChange={(v) =>
+                patch({
+                  reuse: { ...logistics.reuse, returnDaysOverride: v ?? undefined },
+                })
+              }
+              min={0}
+              step={1}
+            />
+          </div>
+        ) : null}
 
         {reuse ? (
           <DerivedList
@@ -217,11 +237,14 @@ function ExportLogistics({
       </StepCard>
 
       <StepCard title={t("landLegTitle")}>
-        <CheckboxField
-          label={t("replaceReeferTruck")}
-          checked={landLeg.replaceReeferTruck}
-          onChange={(checked) => patchLandLeg({ replaceReeferTruck: checked })}
-        />
+        <div>
+          <CheckboxField
+            label={t("replaceReeferTruck")}
+            checked={landLeg.replaceReeferTruck}
+            onChange={(checked) => patchLandLeg({ replaceReeferTruck: checked })}
+          />
+          <p className="mt-1 text-[11px] text-eui-fg-muted">{t("replaceReeferTruckHint")}</p>
+        </div>
 
         {/* Unchecked, there is no reefer to replace on the ground — the engine
             zero-flows transport savings and the fields below would be inert. */}

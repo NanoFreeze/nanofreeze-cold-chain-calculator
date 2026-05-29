@@ -69,12 +69,12 @@ export function SpoilageStep({ input, output, onChange }: Props) {
           />
         </div>
 
+        <div className="inline-flex items-center gap-2 rounded-control border border-eui-accent/30 bg-eui-accent/10 px-3 py-1.5 text-[11px] font-medium text-eui-accent">
+          {t("recoveredFractionNote", { pct: formatPercent(recoveredFraction, locale) })}
+        </div>
+
         <DerivedList
           items={[
-            {
-              label: t("derivedRecoveredFraction"),
-              value: formatPercent(recoveredFraction, locale),
-            },
             {
               label: t("derivedRecoveredValue", { event: eventLabel }),
               value: formatMoney(output.monetary.recoveredValue.perEvent.cop, locale),

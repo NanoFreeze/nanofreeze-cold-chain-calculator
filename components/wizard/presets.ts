@@ -17,6 +17,25 @@ import type {
 
 export type ScenarioKey = `${CapasMarket}-${CapasPackaging}`;
 
+/** The four scenarios, in the order the picker renders them. Each is one combined
+ *  market×packaging choice — a single-select, not two axes — mirroring the
+ *  monorepo's CAPAS_SCENARIOS. The card title comes from capasScenarioLabel();
+ *  the descriptive copy lives in messages under `scenario.cards.*`. */
+export const CAPAS_SCENARIOS: {
+  key: ScenarioKey;
+  market: CapasMarket;
+  packaging: CapasPackaging;
+  /** messages key under `scenario.cards` */
+  copyKey: "nacionalCajas" | "nacionalPallets" | "exportacionCajas" | "exportacionPallets";
+  /** which "how it works" line applies — reuse (domestic) or single-use (export) */
+  howItWorks: "reuse" | "singleUse";
+}[] = [
+  { key: "nacional-cajas", market: "nacional", packaging: "cajas", copyKey: "nacionalCajas", howItWorks: "reuse" },
+  { key: "nacional-pallets", market: "nacional", packaging: "pallets", copyKey: "nacionalPallets", howItWorks: "reuse" },
+  { key: "exportacion-cajas", market: "exportacion", packaging: "cajas", copyKey: "exportacionCajas", howItWorks: "singleUse" },
+  { key: "exportacion-pallets", market: "exportacion", packaging: "pallets", copyKey: "exportacionPallets", howItWorks: "singleUse" },
+];
+
 const PRESETS: Record<ScenarioKey, CapasInput> = {
   "nacional-cajas": {
     layers: {

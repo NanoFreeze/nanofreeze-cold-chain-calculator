@@ -131,6 +131,12 @@ export function AssumptionsDrawer({ open, onClose, overrides, onChange }: Props)
                   ) : null}
                 </div>
 
+                {overridden ? (
+                  <p className="mt-1 text-[11px] text-fg-subtle">
+                    {t("default", { value: CAPAS_DEFAULT_ASSUMPTIONS[key] })}
+                  </p>
+                ) : null}
+
                 {meta.source ? (
                   <p className="mt-2 text-[11px] italic text-fg-subtle">
                     {t("source", { source: meta.source })}
