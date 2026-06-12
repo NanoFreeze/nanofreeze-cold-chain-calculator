@@ -1,96 +1,92 @@
-# @nanofreeze/coldchain-calc
+# NanoFreeze Cold-Chain Calculator
 
-Two pure, dependency-light **cold-chain models** for
-[NanoFreeze](https://nanofreeze.tech) cold layers (*capas*):
+## NanoFreeze
 
-1. **Revenue-uplift model** (`.` / `./calc`) — how much more money a route earns
-   when cold layers convert local-grade product to export-grade, cutting waste
-   (*merma*). Reports per-trip differential, lifetime gain, ROI, and payback.
-   Documented below.
-2. **Cost & impact model** (`./capas`, v2) — the *capas* module: reefer
-   replacement + spoilage recovery + CO₂ + perishables across four logistics
-   scenarios. Documented in [its own section](#cost--impact-model-v2--capas-module).
+[NanoFreeze](https://nanofreeze.tech) builds passive **cold layers** — *capas* —
+that hold a cold chain without a running compressor. Slotted between the boxes or
+pallets of a shipment, they keep perishables inside their safe temperature window
+through transport and handling, so product that would otherwise be downgraded or
+lost to spoilage (*merma*) arrives export-grade.
 
-Both are **pure and framework-free** — no IO, no globals, no `Date`, same input
-→ same output — so they run anywhere: Node, the browser, edge. The only optional
-dependency is [`zod`](https://zod.dev) (the runtime input schemas).
+That does three things at once:
 
-> Derived from real fruit-export logistics spreadsheets; MIT licensed.
+- **Money** — less product lost to spoilage, and less (or none) of the reefer
+  trucking or air-freight refrigeration you would otherwise pay for.
+- **CO₂** — avoided spoilage decomposition and avoided reefer diesel, net of the
+  layers' own weight and manufacturing footprint.
+- **Perishables** — kilograms and units of product rescued that would have been
+  thrown away.
 
-## Install
+Those three numbers are the whole argument for switching to cold layers — and
+they are specific to each route, product, and shipping pattern. **This calculator
+exists so a grower, exporter, or logistics team can put in their own numbers and
+see what cold layers would do for them — in money, CO₂, and kilograms — before
+buying anything.** It's public and free to use, live at
+**[opensource.nanofreeze.tech/cold-chain/calculator](https://opensource.nanofreeze.tech/cold-chain/calculator/)**.
+
+## How the app works
+
+The app is a guided wizard. You describe your shipment step by step, and it
+reports what cold layers would save you:
+
+1. **Scenario** — how you move product: domestic or export, in boxes or pallets.
+2. **Product & packaging** — the product, its value/units/weight per box or
+   pallet, and the cold layers (sizing is guided from box length and how
+   heat-sensitive the product is, with a manual override).
+3. **Logistics** — transport, frequency, distance, and — for domestic routes —
+   the layer reuse cycle.
+4. **Spoilage** — how much of your spoilage the cold layers recover.
+5. **Results** — the **money saved, CO₂ avoided, and perishables rescued**, each
+   broken down per trip, per month, and per year.
+
+Every underlying assumption is editable, and each scenario loads pre-filled with
+a worked example, so you get a sensible answer immediately and can then bend the
+inputs to your own case. The interface is bilingual (Spanish / English) and
+themed to match NanoFreeze (light / dark / system).
+
+## How it's built
+
+This repo is **two things in one**: a pure calculation **engine** published to npm,
+and a **Next.js app** that wraps it in the wizard above.
+
+- The **engine** (`src/`, published as `@nanofreeze/coldchain-calc`) is pure and
+  framework-free — no IO, no globals, no `Date`, same input → same output — so it
+  runs anywhere: Node, the browser, edge. Its only runtime dependency is
+  [`zod`](https://zod.dev), for the input schemas. It's derived from NanoFreeze's
+  real fruit-export logistics workbooks, and its parity against them is locked in
+  tests.
+- The **app** imports that engine under its published name — it never
+  re-implements the math, so [`src/`](./src) stays the single source of truth. It
+  builds to a **static export** (`output: "export"`): no server, no API, every
+  calculation runs in the browser. That's what keeps it forkable — `npm run build`
+  produces an `out/` directory you can drop on GitHub Pages, Netlify, Vercel, S3,
+  or any static host.
+
+```bash
+npm install
+npm run dev      # dev server on http://localhost:4173
+npm run build    # static site → out/
+npm start        # serve the built out/ locally on :4173
+```
+
+App source: [`app/`](./app) (routes + layout), [`components/`](./components)
+(wizard, theme, chrome), [`messages/`](./messages) (ES/EN copy),
+[`i18n/`](./i18n), [`styles/`](./styles) (design tokens).
+
+### The engine (npm package)
 
 ```bash
 npm install @nanofreeze/coldchain-calc
 ```
 
-## Revenue-uplift model (v1)
+The package ships **two complementary models**.
 
-The original engine — cold layers convert local-grade product to export-grade,
-so revenue per trip rises. `computeColdChain` reports the per-trip differential,
-lifetime gain, ROI, and payback.
-
-```ts
-import {
-  computeColdChain,
-  pickRecommendedScenario,
-  paybackTrips,
-  COLD_CHAIN_DEFAULTS,
-} from "@nanofreeze/coldchain-calc";
-
-const output = computeColdChain({
-  ...COLD_CHAIN_DEFAULTS,
-  // ...override any field
-});
-
-const best = pickRecommendedScenario(output);          // highest lifetime gain
-const trips = best && paybackTrips(best, output.totalCapaCost); // trips to break even
-```
-
-### Browser / zero-zod imports
-
-The barrel (`.`) pulls in `zod` via the input schema. To keep a browser bundle
-zod-free, import the pure subpaths directly:
-
-```ts
-import { computeColdChain } from "@nanofreeze/coldchain-calc/calc";
-import { COLD_CHAIN_DEFAULTS } from "@nanofreeze/coldchain-calc/defaults";
-import { getColdChainCountry } from "@nanofreeze/coldchain-calc/country";
-```
-
-## The model (in one breath)
-
-`totalTruckKg = kgPerCanastilla × canastillasPerTruck`. One *capa* per tower of
-baskets (`capasPerTruck = ceil(canastillasPerTruck / canastillasPerTorre)`), so
-`totalCapaCost = costPerCapa × capasPerTruck`, depreciated across
-`monthsLifespan × tripsPerMonth` trips. Each scenario reallocates the load
-between export/local/waste; the **differential** vs. the baseline scenario,
-minus per-trip capa depreciation, is the net gain. Waste is informational (it
-never reached sale). See `calc.ts` — it's ~160 lines and heavily commented.
-
-## Cost & impact model (v2 — capas module)
-
-The `./capas` subpath is a second, complementary model. Where v1 measures a
-*revenue uplift*, v2 measures the **cost and impact of using cold layers as a
-refrigeration replacement**, and reports three first-class outcomes:
-
-- **Money** — reefer-truck (or air-lane) replacement savings net of the layer
-  investment, plus recovered cargo value, normalised per event / month / year
-  (and per layer-life horizon for domestic lanes).
-- **CO₂** — avoided spoilage decomposition + avoided reefer diesel, minus the
-  penalty of hauling the extra layer weight and the layers' embodied
-  manufacturing footprint.
-- **Perishables** — kg and units of product rescued from spoilage.
-
-It spans **four scenarios** — `market` (`nacional` | `exportacion`) ×
-`packaging` (`cajas` | `pallets`): domestic reefer-truck replacement with
-reusable layer sets, and export air freight with an optional refrigerated land
-leg. `capasScenarioLabel(market, packaging, locale)` renders the picker copy
-("Nacional · Cajas", "Export · Pallets").
-
-Every global assumption ships **bilingual (ES/EN) explain metadata** —
-`CAPAS_ASSUMPTIONS_META` carries a label, unit, explanation, and provenance for
-each field in `CAPAS_DEFAULT_ASSUMPTIONS`, so a UI or PDF can justify (and let
-the user override) every number.
+**Cost & impact model (`./capas`)** — the model the app runs. It measures the
+cost and impact of using cold layers as a refrigeration replacement across **four
+scenarios** — `market` (`nacional` | `exportacion`) × `packaging` (`cajas` |
+`pallets`) — and reports money, CO₂, and perishables. Every global assumption
+ships with bilingual (ES/EN) explain metadata (`CAPAS_ASSUMPTIONS_META`), so a UI
+or PDF can justify — and let the user override — every number.
 
 ```ts
 import {
@@ -113,7 +109,7 @@ const out = computeCapas({
     reeferHoursPerTrip: 10,
     reuse: { hasReturnLogistics: true, outboundDays: 1 },
   },
-  // assumptions: { copPerUsd: 4000 },  // override any global default
+  // assumptions: { copPerUsd: 4100 },  // override any global default (TRM defaults to 3248.87)
 });
 
 out.monetary.total.perEvent;        // { cop, usd } saved per trip
@@ -126,39 +122,28 @@ Money is always `{ cop, usd }` with `usd = cop / copPerUsd`. The full input and
 output contracts live in [`src/capas/types.ts`](./src/capas/types.ts); parity
 against the source workbook is locked in [`src/capas.test.ts`](./src/capas.test.ts).
 
-## The calculator app
+**Revenue-uplift model (`.` / `./calc`)** — the original engine. Cold layers
+convert local-grade product to export-grade, so revenue per trip rises;
+`computeColdChain` reports the per-trip differential, lifetime gain, ROI, and
+payback.
 
-This repo is **two things in one**: the pure engine above (published to npm), and
-a **Next.js app** that wraps it in a five-step wizard — the public calculator,
-**live at
-[opensource.nanofreeze.tech/cold-chain/calculator](https://opensource.nanofreeze.tech/cold-chain/calculator/)**.
+```ts
+import {
+  computeColdChain,
+  pickRecommendedScenario,
+  paybackTrips,
+  COLD_CHAIN_DEFAULTS,
+} from "@nanofreeze/coldchain-calc";
 
-The app is App Router + React 19 + Tailwind v4 + next-intl (ES/EN), themed with
-NanoFreeze's design tokens (light/dark/system). It runs the **cost & impact
-model** (`./capas`): the four scenarios, layer sizing guided from box length +
-heat sensitivity, an editable assumptions drawer, CO₂ and perishables. Each
-scenario is seeded with the workbook's worked examples, so a freshly-loaded case
-reproduces the parity fixtures in [`src/capas.test.ts`](./src/capas.test.ts).
-
-It builds to a **static export** (`output: "export"`) — no server, no API, all
-calculation in the browser. That's what makes it forkable: `npm run build`
-produces an `out/` directory you can drop on GitHub Pages, Netlify, Vercel, S3,
-or any static host.
-
-```bash
-npm install
-npm run dev      # dev server on http://localhost:4173
-npm run build    # static site → out/   (also copies public/ index.html root redirect)
-npm start        # serve the built out/ locally on :4173
+const output = computeColdChain({ ...COLD_CHAIN_DEFAULTS /* …override any field */ });
+const best = pickRecommendedScenario(output);                    // highest lifetime gain
+const trips = best && paybackTrips(best, output.totalCapaCost);  // trips to break even
 ```
 
-The app source: [`app/`](./app) (routes + layout), [`components/`](./components)
-(wizard, theme, chrome), [`messages/`](./messages) (ES/EN copy), [`i18n/`](./i18n),
-[`styles/`](./styles) (design tokens). The app imports the engine under its
-published name (`@nanofreeze/coldchain-calc/capas`) via a tsconfig path alias, so
-it never re-implements the math — [`src/`](./src) stays the single source of truth.
+The barrel (`.`) pulls in `zod` via the input schema. To keep a browser bundle
+zod-free, import the pure subpaths directly (`/calc`, `/defaults`, `/country`).
 
-## Develop the engine
+### Develop the engine
 
 ```bash
 npm run build:lib   # emit dist/ (ESM + .d.ts) — the published package
@@ -166,10 +151,10 @@ npm run typecheck
 npm test            # vitest — engine parity + sizing
 ```
 
-`dist/` is built from [`tsconfig.build.json`](./tsconfig.build.json) (native ESM,
-`.js` specifiers) and is what `npm publish` ships — its only runtime dependency is
-`zod`. The Next.js toolchain (Next, React, Tailwind) is a devDependency and never
-reaches a consumer of the package.
+`dist/` is built from [`tsconfig.build.json`](./tsconfig.build.json) and is what
+`npm publish` ships — its only runtime dependency is `zod`. The web toolchain
+(Next, React, Tailwind) is a devDependency and never reaches a consumer of the
+package.
 
 ## License
 
